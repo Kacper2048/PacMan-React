@@ -20,7 +20,7 @@ const FPS = 17; //around 16 and 2/3ms
 const SIZE = 50;
 const ANIMATION_SPEED = 100;
 
-export default function PacMan({children, tileSize, gameCycle, xCentrum, yCentrum, rotate, dir=0})
+export default function PacMan({children, tileSize, gameCycle, xCentrum, yCentrum, rotate, changeHappen,dir=0})
 {
     let howManyFramesPerCycle = useRef(gameCycle/FPS);
 
@@ -30,7 +30,9 @@ export default function PacMan({children, tileSize, gameCycle, xCentrum, yCentru
     let timeOut = useRef(null);
 
     useEffect(()=>{
-
+        
+        RowPercOfProgress.current = RowPercOfProgress.current % tileSize; //that two lines delete that funy error
+        ColPercOfProgress.current = ColPercOfProgress.current % tileSize;
         timeOut.current = setTimeout(()=>{
 
             switch(dir)
@@ -68,8 +70,8 @@ export default function PacMan({children, tileSize, gameCycle, xCentrum, yCentru
 
 
     return(
-    <div className="pacman" style={{transform: `translate(${ColPercOfProgress.current-25}px, ${RowPercOfProgress.current-25}px)`}}>
-        <Sprite sprite={pacman} xCentrum={xCentrum} yCentrum={yCentrum} frameWidth={SIZE} frameHeight={SIZE} frameCount={3} speed={ANIMATION_SPEED} rotate={rotate} isRevert={true}/>
+    <div className="pacman">
+        <Sprite ColPercOfProgress={ColPercOfProgress.current} RowPercOfProgress={RowPercOfProgress.current} sprite={pacman} xCentrum={xCentrum} yCentrum={yCentrum} frameWidth={SIZE} frameHeight={SIZE} frameCount={3} speed={ANIMATION_SPEED} rotate={rotate} isRevert={true}/>
     </div>
     );
 }

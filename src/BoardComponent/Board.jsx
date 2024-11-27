@@ -85,7 +85,7 @@ export default function Board({children})
     let tileSize = useRef(30);
     let [state, setState] = useState(0);
     let clock = useRef(null);
-
+    let bigEvent = useRef(null);
     let board = useRef(
         [
             [-7, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -5, -7, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -5],
@@ -153,19 +153,19 @@ export default function Board({children})
         switch(key)
         {
             case "w":
-            pacManCharacter.current.changeDir(Direction.UP)
+                bigEvent.current = Direction.UP;
             break;
 
             case "d":
-            pacManCharacter.current.changeDir(Direction.RIGHT)
+                bigEvent.current =Direction.RIGHT;
             break;
 
             case "s":
-            pacManCharacter.current.changeDir(Direction.DOWN)
+                bigEvent.current =Direction.DOWN;
             break;
 
             case "a":
-            pacManCharacter.current.changeDir(Direction.LEFT)
+                bigEvent.current =Direction.LEFT;
             break;
         }
     }
@@ -181,11 +181,8 @@ export default function Board({children})
                         {
                             return(
                                 (row == pacManCharacter.current.getPos().posRow && col == pacManCharacter.current.getPos().posCol) ? 
-                                <div>
+
                                 <PacMan tileSize={50} gameCycle ={gameCycle} xCentrum = {tileSize.current/2} yCentrum={tileSize.current/2} rotate={pacManCharacter.current.getAngleOfRotate()} dir={pacManCharacter.current.getDir()}/>
-                                    <div  className={"tile " + styleArray.current[`${board.current[row][col]}`]} key={`${row}-${col}`}>
-                                    </div>
-                                </div>
                                 : 
                                 <div  className={"tile " + styleArray.current[`${board.current[row][col]}`]} key={`${row}-${col}`}>
                                 </div>
@@ -203,20 +200,27 @@ export default function Board({children})
 
     function moveAllCharacter()
     {
-        //pacManCharacter.current.move();
-        console.log(pacManCharacter.current.getPos())
+        pacManCharacter.current.move();
     }
 
     function oneCycleOfGame()
     {
         setState((prev)=>prev+1);
+
         moveAllCharacter();
+        
+        if(bigEvent.current != null)
+        {
+            pacManCharacter.current.changeDir(bigEvent.current);
+            bigEvent.current = null;
+        }
     }
 
     useEffect( //set clock
         ()=>
         {
             clock.current = setTimeout(()=>oneCycleOfGame(), gameCycle);
+
             return () => { //cleanup
             clearInterval(clock.current);
             }

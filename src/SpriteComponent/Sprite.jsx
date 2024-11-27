@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef} from "react";
 import "./spriteStyle.css"; // Include styles here
 
-export default function Sprite({ sprite, yCentrum, xCentrum, frameWidth, frameHeight, frameCount, speed, rotate=0, isRevert=false })
+export default function Sprite({ sprite, yCentrum, xCentrum, frameWidth, frameHeight, frameCount, speed, ColPercOfProgress, RowPercOfProgress, rotate=0, isRevert=false })
 {
   let [currentFrame, setCurrentFrame] = useState(0);
   let direction = useRef('right');
@@ -55,8 +55,8 @@ export default function Sprite({ sprite, yCentrum, xCentrum, frameWidth, frameHe
         backgroundRepeat: "no-repeat",
         position: 'absolute',
         left: `${xCentrum}px`,  // Align horizontally to the center of the parent
-        top: `${yCentrum}px`,   // Align vertically to the center of the parent
-        transform: `rotate(${rotate}deg) `,  // Adjust to center the div exactly
+        top: `${yCentrum}px`,   // Align vertically to the center of the parent  // Adjust to center the div exactly
+        transform: `translate(${ColPercOfProgress-25}px, ${RowPercOfProgress-25}px) rotate(${rotate}deg)`,
       }}
     ></div>
   );
