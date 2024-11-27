@@ -1,0 +1,148 @@
+.board
+{
+    background-color: rgb(0, 0, 0);
+    width: 840px;
+    height: 960px;
+    color: azure;
+    transform-origin: 0 0;
+}
+
+.colorYourLife
+{
+    width: 100px;
+    height: 300px;
+    display: grid;
+    align-items: center;
+    justify-content: center;
+}
+
+.row
+{
+    display: flex;
+}
+
+.tile
+{
+    cursor: pointer;
+    width: 30px; /* Fixed */
+    height: 30px;
+    font-size: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(0, 0, 0);
+}
+
+.wall
+{
+    background-color: rgb(0, 153, 255);
+}
+
+.emptySpace
+{
+    background-color: rgb(0, 0, 0);
+}
+
+.smallPellet
+{
+    background-color: rgb(251, 255, 0);
+    margin: 10px;
+    width: 10px;
+    height: 10px;
+    border-width: 0px;
+    border-radius: 10px;
+    transform: scale(1); /* Prevents fractional scaling */
+}
+
+.bigPellet
+{
+    background-color: rgb(255, 187, 0);
+    margin: 7px;
+    width: 16px;
+    height: 16px;
+    border-radius: 8px;
+}
+
+.ghostWall
+{
+    width: 30px;
+    height: 4px;
+    margin: 13px 0px 13px 0px;
+    border-style: solid;
+    border-width: 0px;
+    padding: 0px;
+    background-color: rgb(180, 180, 180);
+}
+
+.gridPainter
+{
+    display: grid;
+    grid-template-columns: auto auto;
+
+}
+
+.tile.downrightcorner
+{
+    width: 13px;
+    height: 13px;
+    margin: 13px 0px 0px 13px;
+    border-radius: 15px 0px 0px 0px;
+    border-style: solid;
+    border-width: 4px 0px 0px 4px;
+    border-color: rgb(0, 153, 255);
+}
+
+.tile.horizontal
+{
+    width: 30px;
+    height: 4px;
+    margin: 13px 0px 13px 0px;
+    border-style: solid;
+    border-width: 0px;
+    padding: 0px;
+    background-color: rgb(0, 153, 255);
+}
+
+.tile.leftdowncorner
+{
+    width: 13px;
+    height: 13px;
+    margin: 13px 13px 0px 0px;
+    border-radius: 0px 13px 0px 0px;
+    border-style: solid;
+    border-width: 4px 4px 0px 0px;
+    border-color: rgb(0, 153, 255);
+}
+
+
+.tile.vertical
+{
+    width: 4px;
+    height: 30px;
+    margin: 0px 13px 0px 13px;
+    border-style: solid;
+    border-width: 0px;
+    background-color: rgb(0, 153, 255);
+}
+
+.tile.topleftcorner
+{
+    width: 13px;
+    height: 13px;
+    margin: 0px 13px 13px 0px;
+    border-radius: 0px 0px 13px 0px;
+    border-style: solid;
+    border-width: 0px 4px 4px 0px;
+    border-color: rgb(0, 153, 255);
+}
+
+.tile.righttopcorner
+{
+    width: 13px;
+    height: 13px;
+    margin: 0px 0px 13px 13px;
+    border-radius: 0px 0px 0px 15px;
+    border-style: solid;
+    border-width: 0px 0px 4px 4px;
+    border-color: rgb(0, 153, 255);
+}
