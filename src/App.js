@@ -3,12 +3,12 @@ import React from "react";
 import Sprite from "./SpriteComponent/Sprite.jsx";
 import pacmanSprite from "./spritesPNG/PacMan.png"; // Import your sprite sheet
 import BoardGenerator from './BoardComponent/BoardGenerator.jsx';
-import BoardGe from './BoardComponent/Board.jsx';
+import Board from './BoardComponent/Board.jsx';
 
 function App() {
   return (
     <div className="App">
-      <BoardGenerator/>
+      <Board/>
     </div>
   );
 }
