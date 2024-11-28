@@ -3,6 +3,8 @@ import { useState, useRef, useEffect } from "react";
 import PacMan from "../PacManComponent/PacMan.jsx";
 import Sprite from '../SpriteComponent/Sprite.jsx';
 import pacmantexture from '../spritesPNG/PacMan.png';
+import Ghost from'../GhostComponent/Ghost.jsx';
+
 import "./boardStyle.css";
 
 
@@ -15,7 +17,7 @@ const Direction = Object.freeze({
     RIGHT: 0
 });
 
-class pacMan
+class Character
 {
     constructor(posRow, posCol, actDir=Direction.RIGHT) //LEFT is 0 degree of rotate "DOWN" 90 RIGHT 180 UP 270
     {
@@ -158,8 +160,11 @@ export default function Board({children})
     );
 
     let pacManCharacter = useRef(
-        new pacMan(23,14,Direction.RIGHT)
+        new Character(23,14,Direction.RIGHT)
     )
+
+    let redGhostCharacter = useRef(new Character(11,13, Direction.UP));
+
 
     function setNewValue(row,col,val) //style is tied with value of the tile and it is asigned during rendering
     {
@@ -222,14 +227,18 @@ export default function Board({children})
                     {
                         element.map( (x,col) => 
                         {
-                            return(
-                                (row == pacManCharacter.current.getPos().posRow && col == pacManCharacter.current.getPos().posCol) ? 
 
-                                <PacMan isFreez={pacManCharacter.current.getIsFreez()} tileSize={30} gameCycle ={gameCycle} xCentrum = {tileSize.current/2} yCentrum={tileSize.current/2} rotate={pacManCharacter.current.getAngleOfRotate()} dir={pacManCharacter.current.getDir()}/>
-                                : 
-                                <div  className={"tile " + styleArray.current[`${board.current[row][col]}`]} key={`${row}-${col}`}>
-                                </div>
-                            );
+                           
+                        {
+                            if(row == pacManCharacter.current.getPos().posRow && col == pacManCharacter.current.getPos().posCol)
+                                return  (<PacMan isFreez={pacManCharacter.current.getIsFreez()} tileSize={30} gameCycle ={gameCycle} xCentrum = {tileSize.current/2} yCentrum={tileSize.current/2} rotate={pacManCharacter.current.getAngleOfRotate()} dir={pacManCharacter.current.getDir()}/>)
+                            else if(row == redGhostCharacter.current.getPos().posRow && col == redGhostCharacter.current.getPos().posCol)
+                                return  (<Ghost isFreez={redGhostCharacter.current.getIsFreez()} tileSize={30} gameCycle ={gameCycle} xCentrum = {tileSize.current/2} yCentrum={tileSize.current/2} rotate={redGhostCharacter.current.getAngleOfRotate()} dir={redGhostCharacter.current.getDir()}/>)
+                            else
+                                return (<div  className={"tile " + styleArray.current[`${board.current[row][col]}`]} key={`${row}-${col}`}>
+                                </div>)
+                        }
+
                         }
                         )
                     }   
@@ -259,6 +268,49 @@ export default function Board({children})
         }
     }
     
+    function ghostCollisionWithWall({posRow,posCol},dir)
+    {
+        switch(dir)
+        {
+            case 0:
+                {
+                    posCol++;
+                }
+            break;
+
+            case 1:
+                {
+                    posRow++;
+                }
+            break;
+
+            case 2:
+                {
+                    posCol--;
+                }
+            break;
+
+            case 3:
+                {
+                    posRow--;
+                }
+            break;
+        }
+
+        if(board.current[posRow][posCol] < 0)
+        {
+            let randomNumber = Math.floor(Math.random() * 4);
+            redGhostCharacter.current.changeDir(randomNumber);
+            redGhostCharacter.current.setFreez(true);
+            return true;
+        }
+        else
+        {
+            redGhostCharacter.current.setFreez(false);
+            return false;
+        }
+    }
+
     function checkCollisionWithWall({posRow,posCol},dir)
     {
         /*
@@ -310,6 +362,8 @@ export default function Board({children})
     function moveAllCharacter()
     {
         pacManCharacter.current.move();
+
+        redGhostCharacter.current.move();
     }
 
     function oneCycleOfGame()
@@ -325,6 +379,7 @@ export default function Board({children})
             bigEvent.current = null;
         }
         checkCollisionWithWall(pacManCharacter.current.getPos(), pacManCharacter.current.getDir());
+        ghostCollisionWithWall(redGhostCharacter.current.getPos(),redGhostCharacter.current.getDir());
     }
 
     useEffect( //set clock

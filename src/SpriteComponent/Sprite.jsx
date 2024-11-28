@@ -1,41 +1,59 @@
 import React, { useState, useEffect, useRef} from "react";
 import "./spriteStyle.css"; // Include styles here
 
-export default function Sprite({ sprite, yCentrum, xCentrum, frameWidth, frameHeight, frameCount, speed, ColPercOfProgress, RowPercOfProgress, rotate=0, isRevert=false })
+export default function Sprite({ sprite, yCentrum, xCentrum, frameWidth, frameHeight, frameCount, speed, ColPercOfProgress, RowPercOfProgress, howMuch=0 ,rotate=0, isRevert=false, offset=0})
 {
-  let [currentFrame, setCurrentFrame] = useState(0);
+  let [currentFrame, setCurrentFrame] = useState(offset);
   let direction = useRef('right');
-
+  let interval = useRef(null)
   useEffect(() => 
   {
-      let interval = null;
       if(speed > 0)
       {
-        if(direction.current == 'right')
+        if(howMuch == 0)
         {
+          if(direction.current == 'right')
+            {
+                interval = setTimeout(() => 
+                {
+                  setCurrentFrame((prev) => 
+                  { 
+                    if(prev + 2 == frameCount) //prev + 2 because the lest one frame will be rendered after this cycle and if there would be +1 then it go outside the range
+                    {
+                      direction.current = 'left';
+                    }
+                    return (prev+1);
+                  });
+                }, speed);
+            }
+            else
+            {
+                interval = setTimeout(() => 
+                {
+                  setCurrentFrame((prev) => 
+                  { 
+                    if(prev-1 == 0)
+                    {
+                      direction.current = 'right';
+                    }
+                    return (prev-1);
+                  });
+                }, speed);
+            }
+        }
+        else if(howMuch > 0)
+        {
+
             interval = setTimeout(() => 
             {
               setCurrentFrame((prev) => 
               { 
-                if(prev + 2 == frameCount) //prev + 2 because the lest one frame will be rendered after this cycle and if there would be +1 then it go outside the range
+                console.log("offset:" + offset + "   prev: " + prev);
+                if(prev+1 >= offset+howMuch) //prev + 2 because the lest one frame will be rendered after this cycle and if there would be +1 then it go outside the range
                 {
-                  direction.current = 'left';
+                  return (offset);
                 }
                 return (prev+1);
-              });
-            }, speed);
-        }
-        else
-        {
-            interval = setTimeout(() => 
-            {
-              setCurrentFrame((prev) => 
-              { 
-                if(prev-1 == 0)
-                {
-                  direction.current = 'right';
-                }
-                return (prev-1);
               });
             }, speed);
         }
@@ -58,7 +76,7 @@ export default function Sprite({ sprite, yCentrum, xCentrum, frameWidth, frameHe
         width: `${frameWidth}px`,
         height: `${frameHeight}px`,
         backgroundImage: `url(${sprite})`,
-        backgroundPosition: `-${currentFrame * frameWidth}px 0px`, // Move horizontally
+        backgroundPosition: `-${(currentFrame) * frameWidth}px 0px`, // Move horizontally
         backgroundSize: `${frameWidth * frameCount}px ${frameHeight}px`, // Scale the background image
         backgroundRepeat: "no-repeat",
         position: 'absolute',
