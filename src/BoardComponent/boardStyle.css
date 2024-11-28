@@ -146,3 +146,65 @@
     border-width: 0px 0px 4px 4px;
     border-color: rgb(0, 153, 255);
 }
+
+
+.Game
+{
+    height: 960px;
+    width: 1240px;
+    display: grid;
+    grid-template-columns: 200px 840px 200px;
+}
+
+.PointsAndLife
+{
+    font-size: 30px;
+    font-weight: 800;
+    color: bisque;
+    display: grid;
+    align-items: center;
+    justify-content: center;
+}
+
+.livesDiv
+{
+    height: 40px;
+    margin: 20px;
+}
+
+.pacManSpriteLives
+{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.livesContainer
+{
+    width: 40px;
+    height: 40px;
+}
+
+.menuButton
+{
+    margin: 50px 10px 50px 10px;
+    font-size: 30px;
+    font-weight: 800;
+    color: bisque;
+    background-color: rgb(32, 32, 32);
+    height: 80px;
+    width: 180px;
+    display: flex;
+    justify-content: center;  /* Centers text horizontally */
+    align-items: center;      /* Centers text vertically */
+    text-align: center;       /* Optional: ensures text is centered if it wraps */
+
+    border-radius: 10px;
+}
+
+.menuButton:hover
+{
+    cursor: pointer;
+    background-color: rgb(92, 92, 92);
+
+}

@@ -1,11 +1,12 @@
 import React from "react";
 import { useState, useRef, useEffect } from "react";
 import PacMan from "../PacManComponent/PacMan.jsx";
-
+import Sprite from '../SpriteComponent/Sprite.jsx';
+import pacmantexture from '../spritesPNG/PacMan.png';
 import "./boardStyle.css";
 
 
-const gameCycle = 200; //200ms
+const gameCycle = 150; //200ms
 
 const Direction = Object.freeze({
     UP: 3,
@@ -22,9 +23,21 @@ class pacMan
         this.posCol = posCol;
         this.actDir = actDir;
         this.angleOfRotate = ( this.actDir * 90) % 360;
+        this.isFreez = false;
     }
 
-    getPos()
+    setFreez(x)
+    {
+        this.isFreez = x;
+    }
+
+    getIsFreez()
+    {
+        let state = this.isFreez
+        return state;
+    }
+
+    getPos()    
     {
         return { posRow: this.posRow, posCol: this.posCol};
     }
@@ -49,28 +62,31 @@ class pacMan
 
     move()
     {
-        switch(this.actDir)
+        if(!this.isFreez)
         {
-        case 0:
-        {
-        this.posCol = this.posCol + 1; 
-        }
-        break;
-        case 1:
-        {
-            this.posRow = this.posRow + 1; 
-        }
-        break;
-        case 2:
-        {
-            this.posCol = this.posCol -1; 
-        }
-        break;
-        case 3:
-        {
-            this.posRow = this.posRow - 1; 
-        }
-        break;
+            switch(this.actDir)
+            {
+            case 0:
+            {
+            this.posCol = this.posCol + 1; 
+            }
+            break;
+            case 1:
+            {
+                this.posRow = this.posRow + 1; 
+            }
+            break;
+            case 2:
+            {
+                this.posCol = this.posCol -1; 
+            }
+            break;
+            case 3:
+            {
+                this.posRow = this.posRow - 1; 
+            }
+            break;
+            }
         }
     }
 
@@ -86,6 +102,9 @@ export default function Board({children})
     let [state, setState] = useState(0);
     let clock = useRef(null);
     let bigEvent = useRef(null);
+    let points = useRef(0);
+    let lives = useRef(3);
+
     let board = useRef(
         [
             [-7, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -5, -7, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -5],
@@ -170,9 +189,33 @@ export default function Board({children})
         }
     }
 
+    function generateLives() 
+    {
+        let tempArray = Array.from({ length: lives.current });
+        
+        return (
+            <div className="pacManSpriteLives">
+                {tempArray.map(() => {
+                    return(
+                    <div className="livesContainer">
+                        <Sprite ColPercOfProgress={0} RowPercOfProgress={0} sprite={pacmantexture} xCentrum={1} yCentrum={0} frameWidth={30} frameHeight={30} frameCount={3} speed={0} rotate={0} isRevert={false}/>
+                    </div>);
+                })}
+            </div>
+        );
+    }
+
     function renderBoard()
     {
         return( 
+            <div className="Game">
+                <div className="PointsAndLife">
+                    <div>
+                        <div>SCORE: {`${points.current}`}</div>
+                        <div className="livesDiv">{generateLives()}</div>
+                    </div>
+                </div>
+
             <div className="board" tabIndex={0} onKeyDown={(event)=>getKey(event)}>
                 {board.current.map( (element,row) => (
                     <div key={row} className="row">
@@ -182,7 +225,7 @@ export default function Board({children})
                             return(
                                 (row == pacManCharacter.current.getPos().posRow && col == pacManCharacter.current.getPos().posCol) ? 
 
-                                <PacMan tileSize={50} gameCycle ={gameCycle} xCentrum = {tileSize.current/2} yCentrum={tileSize.current/2} rotate={pacManCharacter.current.getAngleOfRotate()} dir={pacManCharacter.current.getDir()}/>
+                                <PacMan isFreez={pacManCharacter.current.getIsFreez()} tileSize={30} gameCycle ={gameCycle} xCentrum = {tileSize.current/2} yCentrum={tileSize.current/2} rotate={pacManCharacter.current.getAngleOfRotate()} dir={pacManCharacter.current.getDir()}/>
                                 : 
                                 <div  className={"tile " + styleArray.current[`${board.current[row][col]}`]} key={`${row}-${col}`}>
                                 </div>
@@ -195,9 +238,75 @@ export default function Board({children})
                 )
                 }
             </div>
+
+            <div className="menuButton">
+                <div>
+                    <div>MENU</div>
+                </div>
+            </div>
+
+
+            </div>
             )
     }
 
+    function isPointEaten({posRow,posCol})
+    {
+        if(board.current[posRow][posCol] == 1)
+        {
+            board.current[posRow][posCol]=0;
+            points.current = points.current + 10;
+        }
+    }
+    
+    function checkCollisionWithWall({posRow,posCol},dir)
+    {
+        /*
+        UP: 3,
+        DOWN: 1,
+        LEFT: 2,
+        RIGHT: 0
+        */
+        switch(dir)
+        {
+            case 0:
+                {
+                    posCol++;
+                }
+            break;
+
+            case 1:
+                {
+                    posRow++;
+                }
+            break;
+
+            case 2:
+                {
+                    posCol--;
+                }
+            break;
+
+            case 3:
+                {
+                    posRow--;
+                }
+            break;
+        }
+
+        if(board.current[posRow][posCol] < 0)
+        {
+            pacManCharacter.current.setFreez(true);
+            return true;
+        }
+        else
+        {
+            pacManCharacter.current.setFreez(false);
+            return false;
+        }
+
+    }
+    
     function moveAllCharacter()
     {
         pacManCharacter.current.move();
@@ -206,14 +315,16 @@ export default function Board({children})
     function oneCycleOfGame()
     {
         setState((prev)=>prev+1);
+        isPointEaten(pacManCharacter.current.getPos());
 
         moveAllCharacter();
-        
+
         if(bigEvent.current != null)
         {
-            pacManCharacter.current.changeDir(bigEvent.current);
+            pacManCharacter.current.changeDir(bigEvent.current);           
             bigEvent.current = null;
         }
+        checkCollisionWithWall(pacManCharacter.current.getPos(), pacManCharacter.current.getDir());
     }
 
     useEffect( //set clock

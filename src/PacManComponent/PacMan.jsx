@@ -18,9 +18,9 @@ const Direction = Object.freeze({
 
 const FPS = 17; //around 16 and 2/3ms
 const SIZE = 50;
-const ANIMATION_SPEED = 100;
+const ANIMATION_SPEED = 50;
 
-export default function PacMan({children, tileSize, gameCycle, xCentrum, yCentrum, rotate, changeHappen,dir=0})
+export default function PacMan({children, isFreez, tileSize, gameCycle, xCentrum, yCentrum, rotate,dir=0})
 {
     let howManyFramesPerCycle = useRef(gameCycle/FPS);
 
@@ -31,38 +31,41 @@ export default function PacMan({children, tileSize, gameCycle, xCentrum, yCentru
 
     useEffect(()=>{
         
-        RowPercOfProgress.current = RowPercOfProgress.current % tileSize; //that two lines delete that funy error
-        ColPercOfProgress.current = ColPercOfProgress.current % tileSize;
-        timeOut.current = setTimeout(()=>{
-
-            switch(dir)
-            {
-                case 0:
-                    {
-                        ColPercOfProgress.current = ColPercOfProgress.current+( parseFloat((tileSize/howManyFramesPerCycle.current).toFixed(1)) );
-                    }
-                break;
-
-                case 1:
-                    {
-                        RowPercOfProgress.current = RowPercOfProgress.current + ( parseFloat((tileSize/howManyFramesPerCycle.current).toFixed(1)) );
-                    }
-                break;
-
-                case 2:
-                    {
-                        ColPercOfProgress.current = ColPercOfProgress.current - ( parseFloat((tileSize/howManyFramesPerCycle.current).toFixed(1)) );
-                    }
-                break;
-
-                case 3:
-                    {
-                        RowPercOfProgress.current = RowPercOfProgress.current - ( parseFloat((tileSize/howManyFramesPerCycle.current).toFixed(1)) );
-                    }
-                break;
-            }
-            setSmoothProcess((prev) => prev + 1);
-        }, gameCycle/howManyFramesPerCycle.current);
+        if(!isFreez)
+        {
+            RowPercOfProgress.current = RowPercOfProgress.current % tileSize; //that two lines delete that funy error
+            ColPercOfProgress.current = ColPercOfProgress.current % tileSize;
+            timeOut.current = setTimeout(()=>{
+    
+                switch(dir)
+                {
+                    case 0:
+                        {
+                            ColPercOfProgress.current = ColPercOfProgress.current+( parseFloat((tileSize/howManyFramesPerCycle.current).toFixed(1)) );
+                        }
+                    break;
+    
+                    case 1:
+                        {
+                            RowPercOfProgress.current = RowPercOfProgress.current + ( parseFloat((tileSize/howManyFramesPerCycle.current).toFixed(1)) );
+                        }
+                    break;
+    
+                    case 2:
+                        {
+                            ColPercOfProgress.current = ColPercOfProgress.current - ( parseFloat((tileSize/howManyFramesPerCycle.current).toFixed(1)) );
+                        }
+                    break;
+    
+                    case 3:
+                        {
+                            RowPercOfProgress.current = RowPercOfProgress.current - ( parseFloat((tileSize/howManyFramesPerCycle.current).toFixed(1)) );
+                        }
+                    break;
+                }
+                setSmoothProcess((prev) => prev + 1);
+            }, gameCycle/howManyFramesPerCycle.current);   
+        }
         return ()=>{
             clearTimeout(timeOut.current);
         }

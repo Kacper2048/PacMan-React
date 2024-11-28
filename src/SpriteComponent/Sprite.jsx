@@ -9,33 +9,40 @@ export default function Sprite({ sprite, yCentrum, xCentrum, frameWidth, frameHe
   useEffect(() => 
   {
       let interval = null;
-      if(direction.current == 'right')
+      if(speed > 0)
       {
-          interval = setTimeout(() => 
-          {
-            setCurrentFrame((prev) => 
-            { 
-              if(prev + 2 == frameCount) //prev + 2 because the lest one frame will be rendered after this cycle and if there would be +1 then it go outside the range
-              {
-                direction.current = 'left';
-              }
-              return (prev+1);
-            });
-          }, speed);
+        if(direction.current == 'right')
+        {
+            interval = setTimeout(() => 
+            {
+              setCurrentFrame((prev) => 
+              { 
+                if(prev + 2 == frameCount) //prev + 2 because the lest one frame will be rendered after this cycle and if there would be +1 then it go outside the range
+                {
+                  direction.current = 'left';
+                }
+                return (prev+1);
+              });
+            }, speed);
+        }
+        else
+        {
+            interval = setTimeout(() => 
+            {
+              setCurrentFrame((prev) => 
+              { 
+                if(prev-1 == 0)
+                {
+                  direction.current = 'right';
+                }
+                return (prev-1);
+              });
+            }, speed);
+        }
       }
       else
       {
-          interval = setTimeout(() => 
-          {
-            setCurrentFrame((prev) => 
-            { 
-              if(prev-1 == 0)
-              {
-                direction.current = 'right';
-              }
-              return (prev-1);
-            });
-          }, speed);
+        setCurrentFrame(frameCount-1);
       }
 
     return(
@@ -44,6 +51,7 @@ export default function Sprite({ sprite, yCentrum, xCentrum, frameWidth, frameHe
   }, [currentFrame]);
 
   return (
+    speed > 0 ?
     <div
       className="sprite"
       style={{
@@ -58,6 +66,23 @@ export default function Sprite({ sprite, yCentrum, xCentrum, frameWidth, frameHe
         top: `${yCentrum}px`,   // Align vertically to the center of the parent  // Adjust to center the div exactly
         transform: `translate(${ColPercOfProgress-25}px, ${RowPercOfProgress-25}px) rotate(${rotate}deg)`,
       }}
-    ></div>
+    >
+
+    </div>
+    :
+    <div
+      className="sprite"
+      style={{
+        width: `${frameWidth}px`,
+        height: `${frameHeight}px`,
+        backgroundImage: `url(${sprite})`,
+        backgroundPosition: `-${xCentrum * frameWidth}px 0px`, // Move horizontally
+        backgroundSize: `${frameWidth * frameCount}px ${frameHeight}px`, // Scale the background image
+        backgroundRepeat: "no-repeat",
+        transform: `rotate(${rotate}deg)`,
+      }}
+    >
+
+    </div>
   );
 };
