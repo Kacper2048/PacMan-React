@@ -48,7 +48,6 @@ export default function Sprite({ sprite, yCentrum, xCentrum, frameWidth, frameHe
             {
               setCurrentFrame((prev) => 
               { 
-                console.log("offset:" + offset + "   prev: " + prev);
                 if(prev+1 >= offset+howMuch) //prev + 2 because the lest one frame will be rendered after this cycle and if there would be +1 then it go outside the range
                 {
                   return (offset);

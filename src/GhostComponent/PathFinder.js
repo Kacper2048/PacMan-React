@@ -18,7 +18,8 @@ export default class PathFinderBTS
         //---------------------------------------------------------------------------
 
         this.bts(startPos, endPos);
-        return this.getPath(endPos);
+        let x = [...this.getPath(endPos)];
+        return [...x];
     }
 
     bts(startPos, endPos) 
@@ -42,7 +43,7 @@ export default class PathFinderBTS
             //add to queue all non-visited neighbours
             neighbours.forEach((next) => 
                 {
-                    if (this.#visited[next.row][next.col] == 0) //0 mean is not visited
+                    if (this.#visited[next.row][next.col] >= 0) //0 mean is not visited
                     {
                         this.#queue.push(next);
                         this.#visited[next.row][next.col] = -2;
@@ -79,16 +80,14 @@ export default class PathFinderBTS
     }
 
     getPath(endPos) 
-    {
-        // Trace back from the end position to the start
-        for (let at = endPos; at != null; at = this.#prev[at.row][at.col]) {
+    {   
+        for (let at = endPos; at != null; at = this.#prev[at.row]?.[at.col]) {
             this.#path.push(at);
         }
-
-        // The path is now in reverse order, so reverse it
+        
         this.#path.reverse();
-
-        return [...this.#path];
+        
+        return this.#path.length > 0 ? [...this.#path] : [];
     }
 
     clearFinder()

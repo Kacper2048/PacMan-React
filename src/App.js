@@ -14,14 +14,3 @@ function App() {
 }
 
 export default App;
-
-/*
-  <Sprite
-        sprite={pacmanSprite}       // Path to the sprite sheet
-        frameWidth={195}           // Width of each frame
-        frameHeight={195}          // Height of each frame
-        frameCount={3}             // Total number of frames
-        speed={100}                // Speed of animation in milliseconds
-        isRevert={true}
-      />
-*/
