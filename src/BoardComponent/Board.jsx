@@ -11,12 +11,20 @@ import PathFinderBTS from "../GhostComponent/PathFinder.js";
 
 const gameCycle = 150; //150ms
 
-const Direction = Object.freeze({
+const Direction = Object({
     UP: 3,
     DOWN: 1,
     LEFT: 2,
     RIGHT: 0
 });
+
+const GameState = Object({
+    LOSE: -1,
+    START: 0,
+    RUN: 1,
+    WIN: 2
+});
+
 
 const directionMap = {
     "1,0": Direction.DOWN,
@@ -176,6 +184,7 @@ export default function Board({ children }) {
     let bigEvent = useRef(null);
     let points = useRef(0);
     let lives = useRef(3);
+    let gameState = useRef(GameState.RUN);
 
     let board = useRef(
         [
@@ -220,6 +229,8 @@ export default function Board({ children }) {
                 .filter((item) => item !== null)
         )
     )
+
+    let howManyPelets = useRef(board.current.reduce((total, element)=>{ return total = total + element.filter((square) => square == 1).length}, 0))
 
     let styleArray = useRef(
         {
@@ -334,11 +345,25 @@ export default function Board({ children }) {
         )
     }
 
-    function isPointEaten({ posRow, posCol }) {
+    function isPointEaten({ posRow, posCol }) 
+    {
         if (board.current[posRow][posCol] == 1) {
             board.current[posRow][posCol] = 0;
             points.current = points.current + 10;
+            howManyPelets.current--;
+            console.log("left pelefts: " + howManyPelets.current)
+            if(howManyPelets.current == 0)
+            {
+                endOfGame(GameState.WIN);
+            }
         }
+    }
+
+    function endOfGame(status)
+    {
+        gameState.current = status;
+        pacManCharacter.current.setFreez(true);
+        redGhostCharacter.current.setFreez(true);
     }
 
     function ghostCollisionWithWall({ posRow, posCol }, dir) {
@@ -423,6 +448,43 @@ export default function Board({ children }) {
 
     }
 
+    function checkCollisionWithPacMan(GhostPos, GhostDir, PacManPos)
+    {
+        switch (GhostDir) {
+            case 0:
+                {
+                    GhostPos.posCol++;
+                }
+                break;
+
+            case 1:
+                {
+                    GhostPos.posRow++;
+                }
+                break;
+
+            case 2:
+                {
+                    GhostPos.posCol--;
+                }
+                break;
+
+            case 3:
+                {
+                    GhostPos.posRow--;
+                }
+                break;
+        }
+
+        if(GhostPos.posRow == PacManPos.posRow && GhostPos.posCol == PacManPos.posCol)
+        {
+            endOfGame( GameState.LOSE);
+
+            return true;
+        }
+        return false
+    }
+
     function moveAllCharacter() {
         pacManCharacter.current.move();
         redGhostCharacter.current.moveWithAutopilot(btsFinder.current, avaiablePlces.current); //if freeze it will not move
@@ -430,17 +492,21 @@ export default function Board({ children }) {
     }
 
     function oneCycleOfGame() {
-        setState((prev) => prev + 1);
-        isPointEaten(pacManCharacter.current.getPos());
+    
+        if(gameState.current == GameState.RUN)
+        {
+            setState((prev) => prev + 1);
+            isPointEaten(pacManCharacter.current.getPos());
+            moveAllCharacter();
 
-        moveAllCharacter();
-
-        if (bigEvent.current != null) {
-            pacManCharacter.current.changeDir(bigEvent.current);
-            bigEvent.current = null;
+            if (bigEvent.current != null) {
+                pacManCharacter.current.changeDir(bigEvent.current);
+                bigEvent.current = null;
+            }
+            checkCollisionWithWall(pacManCharacter.current.getPos(), pacManCharacter.current.getDir());
+            ghostCollisionWithWall(redGhostCharacter.current.getPos(), redGhostCharacter.current.getDir());
+            checkCollisionWithPacMan(redGhostCharacter.current.getPos(), redGhostCharacter.current.getDir(), pacManCharacter.current.getPos())
         }
-        checkCollisionWithWall(pacManCharacter.current.getPos(), pacManCharacter.current.getDir());
-        ghostCollisionWithWall(redGhostCharacter.current.getPos(), redGhostCharacter.current.getDir());
     }
 
     useEffect( //set clock
