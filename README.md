@@ -1,75 +1,39 @@
-<<<<<<< HEAD
-# Getting Started with Create React App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+![alt text](https://th.bing.com/th/id/OIP.M_OEh_UcCHCmB5LUdaksJQHaLH?rs=1&pid=ImgDetMain)
 
-## Available Scripts
 
-In the project directory, you can run:
+## About ☝🤓
 
-### `npm start`
+This project is a browser-based implementation of the classic Pac-Man game, built using React.js for modular, reusable components and dynamic state management. The game features a grid-based map, interactive gameplay, and real-time updates for character movements and interactions.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+**Key functionalities include**
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- 🗺**Player-controlled Pac-Man navigating the grid.**🗺
+- 👻 **BFS-driven  ghosts** 👻
+- 🏆 **Score tracking for pellets eaten and bonuses collected.** 🏆
+- 🙏 **Responsive design, ensuring smooth play on different devices** (Provided that we play at 1920x1080)🙏
 
-### `npm test`
+The project showcases skills in React state management, component design, and real-time logic handling, making it a fun and educational experience.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## How to Run the Project 🚀
 
-### `npm run build`
+- Clone the Repository (https example)
+    ```bash
+    git clone https://github.com/Kacper2048/PacMan-React.git
+    cd <project-folder>
+    
+- Install Dependencies( Ensure you have Node.js installed) then run:
+    
+    ```bash
+    npm install
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- Launch the app in your browser with:
+    
+    ```bash
+    npm start
+    
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- Open in Browser
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+    Visit http://localhost:3000 to play the game! 🎮
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-=======
-# PacMan-React
-PacMan game created with react.js
->>>>>>> 0b26b3a4f44e6b69124fe1a0d1387371608fcd8d
