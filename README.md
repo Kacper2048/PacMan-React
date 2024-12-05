@@ -1,5 +1,5 @@
 
-![alt text](https://th.bing.com/th/id/OIP.M_OEh_UcCHCmB5LUdaksJQHaLH?rs=1&pid=ImgDetMain)
+![alt text](https://raw.githubusercontent.com/Kacper2048/PacMan-React/refs/heads/master/mainBoard.png)
 
 
 ## About ☝🤓
@@ -37,3 +37,25 @@ The project showcases skills in React state management, component design, and re
 
     Visit http://localhost:3000 to play the game! 🎮
 
+## 🛠️ **Create Your Own Map!** 🎉
+
+Take control and design your own Pac-Man map with ease!  
+In the `/src/BoardComponent` directory, you'll find the `BoardGenerator.jsx` file.  
+
+### Steps to Customize:
+
+1. **Replace the Board Component:**  
+   In `App.js`, swap `<Board>` with `<BoardGenerator>`.
+
+2. **Design Your Map:**  
+   Use the intuitive interface to create your personalized Pac-Man layout.  
+
+3. **Export Your Map:**  
+   Click the **"Return Array"** button and check your browser's console log.
+
+4. **Integrate Your Creation:**  
+   Copy the printed array and paste it into `/src/BoardComponent/Board.jsx` like this:  
+   ```javascript
+   let board = useRef(<paste your array here>);
+
+![alt text](https://raw.githubusercontent.com/Kacper2048/PacMan-React/refs/heads/master/mapGenerator.png)
