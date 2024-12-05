@@ -8,6 +8,12 @@ import Ghost from '../GhostComponent/Ghost.jsx';
 import "./boardStyle.css";
 import PathFinderBTS from "../GhostComponent/PathFinder.js";
 
+import redGhost from '../spritesPNG/red-ghost-210.png';
+import orangeGhost from '../spritesPNG/orange-ghost-210.png';
+import pinkGhost from '../spritesPNG/pink-ghost-210.png';
+import cyanGhost from '../spritesPNG/cyan-ghost-210.png';
+import eatableGhost from '../spritesPNG/eatable-ghost-210.png';
+import skull from '../spritesPNG/skull.png';
 
 const gameCycle = 150; //150ms
 
@@ -43,6 +49,14 @@ class Character {
         this.isFreez = false;
     }
 
+    isEatable() {
+        return this.#eatable;
+    }
+
+    setEatable(val) {
+        this.#eatable = val;
+    }
+
     setFreez(x) {
         this.isFreez = x;
     }
@@ -60,6 +74,14 @@ class Character {
         this.posRow = posRow;
         this.posCol = posCol;
     }
+
+    setTarget(targetPos, btsFinder) // object posRow;posCol
+    {
+        this.#arrayWithCommand = [];
+        this.generateNewCommands(btsFinder.doYouKnowTheWay({ row: this.posRow, col: this.posCol }, { row: targetPos.posRow, col: targetPos.posCol }));
+        console.log(`Return to home @len: ${this.#arrayWithCommand.length}:`);
+    }
+
 
     changeDir(dir) //must be one of the Direction
     {
@@ -113,39 +135,40 @@ class Character {
     moveWithAutopilot(btsFinder, arr) //arr is a array with all avaiable places to put character
     {
 
-        //if (!this.isFreez) 
-        {
-            if (this.#arrayWithCommand.length == 0) {
-                do {
-                    this.generateNewCommands(btsFinder.doYouKnowTheWay({ row: this.posRow, col: this.posCol }, { row: this.getRandomFromAvaiable([...arr]).row, col: this.getRandomFromAvaiable([...arr]).col }));
-                    console.log("try")
-                } while (this.#arrayWithCommand.length < 5)
-                console.log(`@len: ${this.#arrayWithCommand.length}:`);
+        if (this.#arrayWithCommand.length == 0) {
+            if (this.#airState == true) {
+                this.#airState = false;
+                this.#eatable = false;
             }
-            this.changeDir(this.#arrayWithCommand.shift()) //change dir for first element in array with commands
+            do {
+                this.generateNewCommands(btsFinder.doYouKnowTheWay({ row: this.posRow, col: this.posCol }, { row: this.getRandomFromAvaiable([...arr]).row, col: this.getRandomFromAvaiable([...arr]).col }));
+                console.log("try")
+            } while (this.#arrayWithCommand.length < 5)
+            console.log(`@len: ${this.#arrayWithCommand.length}:`);
+        }
+        this.changeDir(this.#arrayWithCommand.shift()) //change dir for first element in array with commands
 
-            switch (this.actDir) {
-                case 0:
-                    {
-                        this.posCol = this.posCol + 1;
-                    }
-                    break;
-                case 1:
-                    {
-                        this.posRow = this.posRow + 1;
-                    }
-                    break;
-                case 2:
-                    {
-                        this.posCol = this.posCol - 1;
-                    }
-                    break;
-                case 3:
-                    {
-                        this.posRow = this.posRow - 1;
-                    }
-                    break;
-            }
+        switch (this.actDir) {
+            case 0:
+                {
+                    this.posCol = this.posCol + 1;
+                }
+                break;
+            case 1:
+                {
+                    this.posRow = this.posRow + 1;
+                }
+                break;
+            case 2:
+                {
+                    this.posCol = this.posCol - 1;
+                }
+                break;
+            case 3:
+                {
+                    this.posRow = this.posRow - 1;
+                }
+                break;
         }
     }
 
@@ -174,7 +197,17 @@ class Character {
         return this.angleOfRotate;
     }
 
+    isAirState() {
+        return this.#airState;
+    }
+
+    setAirState(val) {
+        this.#airState = val;
+    }
+
     #arrayWithCommand = []; //contain list of direction of move translated from pathFinder
+    #eatable = false;
+    #airState = false;
 }
 
 export default function Board({ children }) {
@@ -185,41 +218,42 @@ export default function Board({ children }) {
     let points = useRef(0);
     let lives = useRef(3);
     let gameState = useRef(GameState.RUN);
+    let timeoutEatable = useRef(null);
+    let isBigPelletEaten = useRef(null);
 
     let board = useRef(
-        [
-            [-7, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -5, -7, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -5],
-            [-4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -4],
-            [-4, 1, -7, -6, -6, -5, 1, -7, -6, -6, -6, -5, 1, -4, -4, 1, -7, -6, -6, -6, -5, 1, -7, -6, -6, -5, 1, -4],
-            [-4, 1, -4, 0, 0, -4, 1, -4, 0, 0, 0, -4, 1, -4, -4, 1, -4, 0, 0, 0, -4, 1, -4, 0, 0, -4, 1, -4],
-            [-4, 1, -2, -6, -6, -3, 1, -2, -6, -6, -6, -3, 1, -2, -3, 1, -2, -6, -6, -6, -3, 1, -2, -6, -6, -3, 1, -4],
-            [-4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -4],
-            [-4, 1, -7, -6, -6, -5, 1, -7, -5, 1, -7, -6, -6, -6, -6, -6, -6, -5, 1, -7, -5, 1, -7, -6, -6, -5, 1, -4],
-            [-4, 1, -2, -6, -6, -3, 1, -4, -4, 1, -2, -6, -6, -5, -7, -6, -6, -3, 1, -4, -4, 1, -2, -6, -6, -3, 1, -4],
-            [-4, 1, 1, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, 1, 1, -4],
-            [-2, -6, -6, -6, -6, -5, 1, -4, -2, -6, -6, -5, 0, -4, -4, 0, -7, -6, -6, -3, -4, 1, -7, -6, -6, -6, -6, -3],
-            [0, 0, 0, 0, 0, -4, 1, -4, -7, -6, -6, -3, 0, -2, -3, 0, -2, -6, -6, -5, -4, 1, -4, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, -4, 1, -4, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -4, -4, 1, -4, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, -4, 1, -4, -4, 0, -7, -6, -6, 3, 3, -6, -6, -5, 0, -4, -4, 1, -4, 0, 0, 0, 0, 0],
-            [-7, -6, -6, -6, -6, -3, 1, -2, -3, 0, -4, 0, 0, 0, 0, 0, 0, -4, 0, -2, -3, 1, -2, -6, -6, -6, -6, -5],
-            [-4, 0, 0, 0, 0, 0, 1, 0, 0, 0, -4, 0, 0, 0, 0, 0, 0, -4, 0, 0, 0, 1, 0, 0, 0, 0, 0, -4],
-            [-2, -6, -6, -6, -6, -5, 1, -7, -5, 0, -4, 0, 0, 0, 0, 0, 0, -4, 0, -7, -5, 1, -7, -6, -6, -6, -6, -3],
-            [0, 0, 0, 0, 0, -4, 1, -4, -4, 0, -2, -6, -6, -6, -6, -6, -6, -3, 0, -4, -4, 1, -4, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, -4, 1, -4, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -4, -4, 1, -4, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, -4, 1, -4, -4, 0, -7, -6, -6, -6, -6, -6, -6, -5, 0, -4, -4, 1, -4, 0, 0, 0, 0, 0],
-            [-7, -6, -6, -6, -6, -3, 1, -2, -3, 0, -2, -6, -6, -5, -7, -6, -6, -3, 0, -2, -3, 1, -2, -6, -6, -6, -6, -5],
-            [-4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -4],
-            [-4, 1, -7, -6, -6, -5, 1, -7, -6, -6, -6, -5, 1, -4, -4, 1, -7, -6, -6, -6, -5, 1, -7, -6, -6, -5, 1, -4],
-            [-4, 1, -2, -6, -5, -4, 1, -2, -6, -6, -6, -3, 1, -2, -3, 1, -2, -6, -6, -6, -3, 1, -4, -7, -6, -3, 1, -4],
-            [-4, 1, 1, 1, -4, -4, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, -4, -4, 1, 1, 1, -4],
-            [-2, -6, -5, 1, -4, -4, 1, -7, -5, 1, -7, -6, -6, -6, -6, -6, -6, -5, 1, -7, -5, 1, -4, -4, 1, -7, -6, -3],
-            [-7, -6, -3, 1, -2, -3, 1, -4, -4, 1, -2, -6, -6, -5, -7, -6, -6, -3, 1, -4, -4, 1, -2, -3, 1, -2, -6, -5],
-            [-4, 1, 1, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, 1, 1, -4],
-            [-4, 1, -7, -6, -6, -6, -6, -3, -2, -6, -6, -5, 1, -4, -4, 1, -7, -6, -6, -3, -2, -6, -6, -6, -6, -5, 1, -4],
-            [-4, 1, -2, -6, -6, -6, -6, -6, -6, -6, -6, -3, 1, -2, -3, 1, -2, -6, -6, -6, -6, -6, -6, -6, -6, -3, 1, -4],
-            [-4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -4],
-            [-2, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -3]
-        ]
+        [[-7, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -5, -7, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -5],
+[-4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -4],
+[-4, 1, -7, -6, -6, -5, 1, -7, -6, -6, -6, -5, 1, -4, -4, 1, -7, -6, -6, -6, -5, 1, -7, -6, -6, -5, 1, -4],
+[-4, 2, -4, 0, 0, -4, 1, -4, 0, 0, 0, -4, 1, -4, -4, 1, -4, 0, 0, 0, -4, 1, -4, 0, 0, -4, 2, -4],
+[-4, 1, -2, -6, -6, -3, 1, -2, -6, -6, -6, -3, 1, -2, -3, 1, -2, -6, -6, -6, -3, 1, -2, -6, -6, -3, 1, -4],
+[-4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -4],
+[-4, 1, -7, -6, -6, -5, 1, -7, -5, 1, -7, -6, -6, -6, -6, -6, -6, -5, 1, -7, -5, 1, -7, -6, -6, -5, 1, -4],
+[-4, 1, -2, -6, -6, -3, 1, -4, -4, 1, -2, -6, -6, -5, -7, -6, -6, -3, 1, -4, -4, 1, -2, -6, -6, -3, 1, -4],
+[-4, 1, 1, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, 1, 1, -4],
+[-2, -6, -6, -6, -6, -5, 1, -4, -2, -6, -6, -5, 0, -4, -4, 0, -7, -6, -6, -3, -4, 1, -7, -6, -6, -6, -6, -3],
+[0, 0, 0, 0, 0, -4, 1, -4, -7, -6, -6, -3, 0, -2, -3, 0, -2, -6, -6, -5, -4, 1, -4, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, -4, 1, -4, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -4, -4, 1, -4, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, -4, 1, -4, -4, 0, -7, -6, -6, 3, 3, -6, -6, -5, 0, -4, -4, 1, -4, 0, 0, 0, 0, 0],
+[-7, -6, -6, -6, -6, -3, 1, -2, -3, 0, -4, 0, 0, 0, 0, 0, 0, -4, 0, -2, -3, 1, -2, -6, -6, -6, -6, -5],
+[-4, 0, 0, 0, 0, 0, 1, 0, 0, 0, -4, 0, 0, 0, 0, 0, 0, -4, 0, 0, 0, 1, 0, 0, 0, 0, 0, -4],
+[-2, -6, -6, -6, -6, -5, 1, -7, -5, 0, -4, 0, 0, 0, 0, 0, 0, -4, 0, -7, -5, 1, -7, -6, -6, -6, -6, -3],
+[0, 0, 0, 0, 0, -4, 1, -4, -4, 0, -2, -6, -6, -6, -6, -6, -6, -3, 0, -4, -4, 1, -4, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, -4, 1, -4, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -4, -4, 1, -4, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, -4, 1, -4, -4, 0, -7, -6, -6, -6, -6, -6, -6, -5, 0, -4, -4, 1, -4, 0, 0, 0, 0, 0],
+[-7, -6, -6, -6, -6, -3, 1, -2, -3, 0, -2, -6, -6, -5, -7, -6, -6, -3, 0, -2, -3, 1, -2, -6, -6, -6, -6, -5],
+[-4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -4],
+[-4, 1, -7, -6, -6, -5, 1, -7, -6, -6, -6, -5, 1, -4, -4, 1, -7, -6, -6, -6, -5, 1, -7, -6, -6, -5, 1, -4],
+[-4, 1, -2, -6, -5, -4, 1, -2, -6, -6, -6, -3, 1, -2, -3, 1, -2, -6, -6, -6, -3, 1, -4, -7, -6, -3, 1, -4],
+[-4, 2, 1, 1, -4, -4, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, -4, -4, 1, 1, 2, -4],
+[-2, -6, -5, 1, -4, -4, 1, -7, -5, 1, -7, -6, -6, -6, -6, -6, -6, -5, 1, -7, -5, 1, -4, -4, 1, -7, -6, -3],
+[-7, -6, -3, 1, -2, -3, 1, -4, -4, 1, -2, -6, -6, -5, -7, -6, -6, -3, 1, -4, -4, 1, -2, -3, 1, -2, -6, -5],
+[-4, 1, 1, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, 1, 1, -4],
+[-4, 1, -7, -6, -6, -6, -6, -3, -2, -6, -6, -5, 1, -4, -4, 1, -7, -6, -6, -3, -2, -6, -6, -6, -6, -5, 1, -4],
+[-4, 1, -2, -6, -6, -6, -6, -6, -6, -6, -6, -3, 1, -2, -3, 1, -2, -6, -6, -6, -6, -6, -6, -6, -6, -3, 1, -4],
+[-4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -4],
+[-2, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -3]
+]
     );
 
     let avaiablePlces = useRef(
@@ -230,7 +264,7 @@ export default function Board({ children }) {
         )
     )
 
-    let howManyPelets = useRef(board.current.reduce((total, element)=>{ return total = total + element.filter((square) => square == 1).length}, 0))
+    let howManyPelets = useRef(board.current.reduce((total, element) => { return total = total + element.filter((square) => square == 1).length }, 0))
 
     let styleArray = useRef(
         {
@@ -255,12 +289,6 @@ export default function Board({ children }) {
     let redGhostCharacter = useRef(new Character(11, 13, Direction.UP));
 
     let btsFinder = useRef(new PathFinderBTS(board.current, 32, 28));
-
-
-    function setNewValue(row, col, val) //style is tied with value of the tile and it is asigned during rendering
-    {
-        board.current[row][col] = val;
-    }
 
     function getKey(event) {
         let key = event.key.toLowerCase();
@@ -298,69 +326,25 @@ export default function Board({ children }) {
         );
     }
 
-    function renderBoard() {
-        return (
-            <div className="Game">
-                <div className="PointsAndLife">
-                    <div>
-                        <div>SCORE: {`${points.current}`}</div>
-                        <div className="livesDiv">{generateLives()}</div>
-                    </div>
-                </div>
-
-                <div className="board" tabIndex={0} onKeyDown={(event) => getKey(event)}>
-                    {board.current.map((element, row) => (
-                        <div key={row} className="row">
-                            {
-                                element.map((x, col) => {
-
-
-                                    {
-                                        if (row == pacManCharacter.current.getPos().posRow && col == pacManCharacter.current.getPos().posCol)
-                                            return (<PacMan isFreez={pacManCharacter.current.getIsFreez()} tileSize={30} gameCycle={gameCycle} xCentrum={tileSize.current / 2} yCentrum={tileSize.current / 2} rotate={pacManCharacter.current.getAngleOfRotate()} dir={pacManCharacter.current.getDir()} />)
-                                        else if (row == redGhostCharacter.current.getPos().posRow && col == redGhostCharacter.current.getPos().posCol)
-                                            return (<Ghost isFreez={redGhostCharacter.current.getIsFreez()} tileSize={30} gameCycle={gameCycle} xCentrum={tileSize.current / 2} yCentrum={tileSize.current / 2} rotate={redGhostCharacter.current.getAngleOfRotate()} dir={redGhostCharacter.current.getDir()} />)
-                                        else
-                                            return (<div className={"tile " + styleArray.current[`${board.current[row][col]}`]} key={`${row}-${col}`}>
-                                            </div>)
-                                    }
-
-                                }
-                                )
-                            }
-                        </div>
-                    )
-                    )
-                    }
-                </div>
-
-                <div className="menuButton">
-                    <div>
-                        <div>MENU</div>
-                    </div>
-                </div>
-
-
-            </div>
-        )
-    }
-
-    function isPointEaten({ posRow, posCol }) 
-    {
+    function isPointEaten({ posRow, posCol }) {
         if (board.current[posRow][posCol] == 1) {
             board.current[posRow][posCol] = 0;
             points.current = points.current + 10;
             howManyPelets.current--;
             console.log("left pelefts: " + howManyPelets.current)
-            if(howManyPelets.current == 0)
-            {
+            if (howManyPelets.current == 0) {
                 endOfGame(GameState.WIN);
             }
         }
+
+        if (board.current[posRow][posCol] == 2) {
+            board.current[posRow][posCol] = 0;
+            points.current = points.current + 20;
+            isBigPelletEaten.current = true;
+        }
     }
 
-    function endOfGame(status)
-    {
+    function endOfGame(status) {
         gameState.current = status;
         pacManCharacter.current.setFreez(true);
         redGhostCharacter.current.setFreez(true);
@@ -448,8 +432,9 @@ export default function Board({ children }) {
 
     }
 
-    function checkCollisionWithPacMan(GhostPos, GhostDir, PacManPos)
-    {
+    function checkCollisionWithPacMan(Ghost, PacManPos) {
+        let GhostPos = Ghost.getPos();
+        let GhostDir = Ghost.getDir();
         switch (GhostDir) {
             case 0:
                 {
@@ -476,13 +461,74 @@ export default function Board({ children }) {
                 break;
         }
 
-        if(GhostPos.posRow == PacManPos.posRow && GhostPos.posCol == PacManPos.posCol)
-        {
-            endOfGame( GameState.LOSE);
+        if (Ghost.isEatable() == false && Ghost.isAirState() == false) 
+         {
+            if (Ghost.getPos().posRow == PacManPos.posRow && Ghost.getPos().posCol == PacManPos.posCol) {
+                endOfGame(GameState.LOSE);
 
-            return true;
+                return true;
+            }
+            return false
         }
-        return false
+        else 
+        {
+            if (Ghost.isAirState() == false) {
+                if (Ghost.getPos().posRow == PacManPos.posRow && Ghost.getPos().posCol == PacManPos.posCol) {
+                    pacManEatGhost(Ghost);
+                }
+            }
+        }
+    }
+
+    function checkCollisionWithGhost(Ghost, PacManDir, PacManPos) {
+        switch (PacManDir) {
+            case 0:
+                {
+                    PacManPos.posCol++;
+                }
+                break;
+
+            case 1:
+                {
+                    PacManPos.posRow++;
+                }
+                break;
+
+            case 2:
+                {
+                    PacManPos.posCol--;
+                }
+                break;
+
+            case 3:
+                {
+                    PacManPos.posRow--;
+                }
+                break;
+        }
+
+        if (Ghost.isEatable() == false && Ghost.isAirState() == false) 
+        {
+            if (Ghost.getPos().posRow == PacManPos.posRow && Ghost.getPos().posCol == PacManPos.posCol) {
+                endOfGame(GameState.LOSE);
+
+                return true;
+            }
+            return false
+        }
+        else {
+            if (Ghost.isAirState() == false) {
+                if (Ghost.getPos().posRow == PacManPos.posRow && Ghost.getPos().posCol == PacManPos.posCol) {
+                    pacManEatGhost(Ghost);
+                }
+            }
+        }
+    }
+
+    function pacManEatGhost(Ghost) {
+        Ghost.setAirState(true); //come back base as skull
+        Ghost.setEatable(false);
+        Ghost.setTarget({ posRow: 14, posCol: 14 }, btsFinder.current);
     }
 
     function moveAllCharacter() {
@@ -492,9 +538,8 @@ export default function Board({ children }) {
     }
 
     function oneCycleOfGame() {
-    
-        if(gameState.current == GameState.RUN)
-        {
+
+        if (gameState.current == GameState.RUN) {
             setState((prev) => prev + 1);
             isPointEaten(pacManCharacter.current.getPos());
             moveAllCharacter();
@@ -505,20 +550,77 @@ export default function Board({ children }) {
             }
             checkCollisionWithWall(pacManCharacter.current.getPos(), pacManCharacter.current.getDir());
             ghostCollisionWithWall(redGhostCharacter.current.getPos(), redGhostCharacter.current.getDir());
-            checkCollisionWithPacMan(redGhostCharacter.current.getPos(), redGhostCharacter.current.getDir(), pacManCharacter.current.getPos())
+            checkCollisionWithPacMan(redGhostCharacter.current, pacManCharacter.current.getPos())
+            checkCollisionWithGhost(redGhostCharacter.current, pacManCharacter.current.getDir(), pacManCharacter.current.getPos())
         }
+    }
+
+    function changeIsEatableAllGhost(val) {
+        redGhostCharacter.current.setEatable(val);
     }
 
     useEffect( //set clock
         () => {
             clock.current = setTimeout(() => oneCycleOfGame(), gameCycle);
 
+            if (isBigPelletEaten.current == true) {
+                changeIsEatableAllGhost(true);
+                isBigPelletEaten.current = false;
+                timeoutEatable.current = setTimeout(() => {
+                    changeIsEatableAllGhost(false);
+                }, 30000);
+            }
+
             return () => { //cleanup
-                clearInterval(clock.current);
+                clearTimeout(clock.current);
             }
         }
 
         , [state]);
+
+    function renderBoard() {
+        return (
+            <div className="Game">
+                <div className="PointsAndLife">
+                    <div>
+                        <div>SCORE: {`${points.current}`}</div>
+                        <div className="livesDiv">{generateLives()}</div>
+                    </div>
+                </div>
+
+                <div className="board" tabIndex={0} onKeyDown={(event) => getKey(event)}>
+                    {board.current.map((element, row) => (
+                        <div key={row} className="row">
+                            {
+                                element.map((x, col) => 
+                                {
+                                if (row == pacManCharacter.current.getPos().posRow && col == pacManCharacter.current.getPos().posCol)
+                                    return (<PacMan isFreez={pacManCharacter.current.getIsFreez()} tileSize={30} gameCycle={gameCycle} xCentrum={tileSize.current / 2} yCentrum={tileSize.current / 2} rotate={pacManCharacter.current.getAngleOfRotate()} dir={pacManCharacter.current.getDir()} />)
+                                else if (row == redGhostCharacter.current.getPos().posRow && col == redGhostCharacter.current.getPos().posCol)
+                                    
+                                    return (<Ghost isEatable={redGhostCharacter.current.isEatable()} isAirState={redGhostCharacter.current.isAirState()} ghostSprite={{ color: redGhost, pork: eatableGhost, skull: skull }} isFreez={redGhostCharacter.current.getIsFreez()} tileSize={30} gameCycle={gameCycle} xCentrum={tileSize.current / 2} yCentrum={tileSize.current / 2} rotate={redGhostCharacter.current.getAngleOfRotate()} dir={redGhostCharacter.current.getDir()} />)
+                                else
+                                    return (<div className={"tile " + styleArray.current[`${board.current[row][col]}`]} key={`${row}-${col}`}>
+                                    </div>)
+                                }
+                                )
+                            }
+                        </div>
+                    )
+                    )
+                    }
+                </div>
+
+                <div className="menuButton">
+                    <div>
+                        <div>MENU</div>
+                    </div>
+                </div>
+
+
+            </div>
+        )
+    }
 
     return (
         <>

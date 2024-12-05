@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef} from "react";
 import "./spriteStyle.css"; // Include styles here
-
 export default function Sprite({ sprite, yCentrum, xCentrum, frameWidth, frameHeight, frameCount, speed, ColPercOfProgress, RowPercOfProgress, howMuch=0 ,rotate=0, isRevert=false, offset=0})
 {
   let [currentFrame, setCurrentFrame] = useState(offset);
