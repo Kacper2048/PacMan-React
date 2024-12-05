@@ -245,7 +245,7 @@ export default function Board({ children }) {
 [-4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -4],
 [-4, 1, -7, -6, -6, -5, 1, -7, -6, -6, -6, -5, 1, -4, -4, 1, -7, -6, -6, -6, -5, 1, -7, -6, -6, -5, 1, -4],
 [-4, 1, -2, -6, -5, -4, 1, -2, -6, -6, -6, -3, 1, -2, -3, 1, -2, -6, -6, -6, -3, 1, -4, -7, -6, -3, 1, -4],
-[-4, 2, 1, 1, -4, -4, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, -4, -4, 1, 1, 2, -4],
+[-4, 2, 1, 1, -4, -4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -4, -4, 1, 1, 2, -4],
 [-2, -6, -5, 1, -4, -4, 1, -7, -5, 1, -7, -6, -6, -6, -6, -6, -6, -5, 1, -7, -5, 1, -4, -4, 1, -7, -6, -3],
 [-7, -6, -3, 1, -2, -3, 1, -4, -4, 1, -2, -6, -6, -5, -7, -6, -6, -3, 1, -4, -4, 1, -2, -3, 1, -2, -6, -5],
 [-4, 1, 1, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, 1, 1, -4],
@@ -286,7 +286,10 @@ export default function Board({ children }) {
         new Character(23, 14, Direction.RIGHT)
     )
 
-    let redGhostCharacter = useRef(new Character(11, 13, Direction.UP));
+    let redGhostCharacter = useRef(new Character(13, 13, Direction.UP));
+    let orangeGhostCharacter = useRef(new Character(15, 11, Direction.UP));
+    let pinkGhostCharacter = useRef(new Character(15, 14, Direction.UP));
+    let cyanGhostCharacter = useRef(new Character(15, 16, Direction.UP));
 
     let btsFinder = useRef(new PathFinderBTS(board.current, 32, 28));
 
@@ -533,8 +536,12 @@ export default function Board({ children }) {
 
     function moveAllCharacter() {
         pacManCharacter.current.move();
+
         redGhostCharacter.current.moveWithAutopilot(btsFinder.current, avaiablePlces.current); //if freeze it will not move
-        //redGhostCharacter.current.move(); //if freeze it will not move
+        orangeGhostCharacter.current.moveWithAutopilot(btsFinder.current, avaiablePlces.current); 
+        pinkGhostCharacter.current.moveWithAutopilot(btsFinder.current, avaiablePlces.current); 
+        cyanGhostCharacter.current.moveWithAutopilot(btsFinder.current, avaiablePlces.current); 
+
     }
 
     function oneCycleOfGame() {
@@ -548,15 +555,37 @@ export default function Board({ children }) {
                 pacManCharacter.current.changeDir(bigEvent.current);
                 bigEvent.current = null;
             }
+            //pacman
             checkCollisionWithWall(pacManCharacter.current.getPos(), pacManCharacter.current.getDir());
+            checkCollisionWithGhost(redGhostCharacter.current, pacManCharacter.current.getDir(), pacManCharacter.current.getPos())
+            checkCollisionWithGhost(orangeGhostCharacter.current, pacManCharacter.current.getDir(), pacManCharacter.current.getPos())
+            checkCollisionWithGhost(pinkGhostCharacter.current, pacManCharacter.current.getDir(), pacManCharacter.current.getPos())
+            checkCollisionWithGhost(cyanGhostCharacter.current, pacManCharacter.current.getDir(), pacManCharacter.current.getPos())
+
+            //orange
+            ghostCollisionWithWall(orangeGhostCharacter.current.getPos(), orangeGhostCharacter.current.getDir());
+            checkCollisionWithPacMan(orangeGhostCharacter.current, pacManCharacter.current.getPos())
+
+            //red
             ghostCollisionWithWall(redGhostCharacter.current.getPos(), redGhostCharacter.current.getDir());
             checkCollisionWithPacMan(redGhostCharacter.current, pacManCharacter.current.getPos())
-            checkCollisionWithGhost(redGhostCharacter.current, pacManCharacter.current.getDir(), pacManCharacter.current.getPos())
+                
+            //pink
+            ghostCollisionWithWall(pinkGhostCharacter.current.getPos(), pinkGhostCharacter.current.getDir());
+            checkCollisionWithPacMan(pinkGhostCharacter.current, pacManCharacter.current.getPos())
+
+            //cyan
+            ghostCollisionWithWall(cyanGhostCharacter.current.getPos(), cyanGhostCharacter.current.getDir());
+            checkCollisionWithPacMan(cyanGhostCharacter.current, pacManCharacter.current.getPos())
+
         }
     }
 
     function changeIsEatableAllGhost(val) {
         redGhostCharacter.current.setEatable(val);
+        orangeGhostCharacter.current.setEatable(val);
+        pinkGhostCharacter.current.setEatable(val);
+        cyanGhostCharacter.current.setEatable(val);
     }
 
     useEffect( //set clock
@@ -597,8 +626,17 @@ export default function Board({ children }) {
                                 if (row == pacManCharacter.current.getPos().posRow && col == pacManCharacter.current.getPos().posCol)
                                     return (<PacMan isFreez={pacManCharacter.current.getIsFreez()} tileSize={30} gameCycle={gameCycle} xCentrum={tileSize.current / 2} yCentrum={tileSize.current / 2} rotate={pacManCharacter.current.getAngleOfRotate()} dir={pacManCharacter.current.getDir()} />)
                                 else if (row == redGhostCharacter.current.getPos().posRow && col == redGhostCharacter.current.getPos().posCol)
-                                    
                                     return (<Ghost isEatable={redGhostCharacter.current.isEatable()} isAirState={redGhostCharacter.current.isAirState()} ghostSprite={{ color: redGhost, pork: eatableGhost, skull: skull }} isFreez={redGhostCharacter.current.getIsFreez()} tileSize={30} gameCycle={gameCycle} xCentrum={tileSize.current / 2} yCentrum={tileSize.current / 2} rotate={redGhostCharacter.current.getAngleOfRotate()} dir={redGhostCharacter.current.getDir()} />)
+                                
+                                else if (row == orangeGhostCharacter.current.getPos().posRow && col == orangeGhostCharacter.current.getPos().posCol)
+                                    return (<Ghost isEatable={orangeGhostCharacter.current.isEatable()} isAirState={orangeGhostCharacter.current.isAirState()} ghostSprite={{ color: orangeGhost, pork: eatableGhost, skull: skull }} isFreez={orangeGhostCharacter.current.getIsFreez()} tileSize={30} gameCycle={gameCycle} xCentrum={tileSize.current / 2} yCentrum={tileSize.current / 2} rotate={orangeGhostCharacter.current.getAngleOfRotate()} dir={orangeGhostCharacter.current.getDir()} />)
+
+                                else if (row == pinkGhostCharacter.current.getPos().posRow && col == pinkGhostCharacter.current.getPos().posCol)
+                                    return (<Ghost isEatable={pinkGhostCharacter.current.isEatable()} isAirState={pinkGhostCharacter.current.isAirState()} ghostSprite={{ color: pinkGhost, pork: eatableGhost, skull: skull }} isFreez={pinkGhostCharacter.current.getIsFreez()} tileSize={30} gameCycle={gameCycle} xCentrum={tileSize.current / 2} yCentrum={tileSize.current / 2} rotate={pinkGhostCharacter.current.getAngleOfRotate()} dir={pinkGhostCharacter.current.getDir()} />)
+
+                                else if (row == cyanGhostCharacter.current.getPos().posRow && col == cyanGhostCharacter.current.getPos().posCol)
+                                    return (<Ghost isEatable={cyanGhostCharacter.current.isEatable()} isAirState={cyanGhostCharacter.current.isAirState()} ghostSprite={{ color: cyanGhost, pork: eatableGhost, skull: skull }} isFreez={cyanGhostCharacter.current.getIsFreez()} tileSize={30} gameCycle={gameCycle} xCentrum={tileSize.current / 2} yCentrum={tileSize.current / 2} rotate={cyanGhostCharacter.current.getAngleOfRotate()} dir={cyanGhostCharacter.current.getDir()} />)
+
                                 else
                                     return (<div className={"tile " + styleArray.current[`${board.current[row][col]}`]} key={`${row}-${col}`}>
                                     </div>)
