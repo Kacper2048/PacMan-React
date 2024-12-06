@@ -223,6 +223,7 @@ export default function Board({ children }) {
     let gameState = useRef(GameState.RUN);
     let timeoutEatable = useRef(null);
     let isBigPelletEaten = useRef(null);
+    let combo = useRef(0);
 
     let board = useRef(
         [[-7, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -5, -7, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -5],
@@ -257,6 +258,41 @@ export default function Board({ children }) {
 [-4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -4],
 [-2, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -3]
 ]
+    );
+
+    let boardCopy = useRef(
+        [[-7, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -5, -7, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -5],
+        [-4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -4],
+        [-4, 1, -7, -6, -6, -5, 1, -7, -6, -6, -6, -5, 1, -4, -4, 1, -7, -6, -6, -6, -5, 1, -7, -6, -6, -5, 1, -4],
+        [-4, 2, -4, 0, 0, -4, 1, -4, 0, 0, 0, -4, 1, -4, -4, 1, -4, 0, 0, 0, -4, 1, -4, 0, 0, -4, 2, -4],
+        [-4, 1, -2, -6, -6, -3, 1, -2, -6, -6, -6, -3, 1, -2, -3, 1, -2, -6, -6, -6, -3, 1, -2, -6, -6, -3, 1, -4],
+        [-4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -4],
+        [-4, 1, -7, -6, -6, -5, 1, -7, -5, 1, -7, -6, -6, -6, -6, -6, -6, -5, 1, -7, -5, 1, -7, -6, -6, -5, 1, -4],
+        [-4, 1, -2, -6, -6, -3, 1, -4, -4, 1, -2, -6, -6, -5, -7, -6, -6, -3, 1, -4, -4, 1, -2, -6, -6, -3, 1, -4],
+        [-4, 1, 1, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, 1, 1, -4],
+        [-2, -6, -6, -6, -6, -5, 1, -4, -2, -6, -6, -5, 0, -4, -4, 0, -7, -6, -6, -3, -4, 1, -7, -6, -6, -6, -6, -3],
+        [0, 0, 0, 0, 0, -4, 1, -4, -7, -6, -6, -3, 0, -2, -3, 0, -2, -6, -6, -5, -4, 1, -4, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, -4, 1, -4, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -4, -4, 1, -4, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, -4, 1, -4, -4, 0, -7, -6, -6, 3, 3, -6, -6, -5, 0, -4, -4, 1, -4, 0, 0, 0, 0, 0],
+        [-7, -6, -6, -6, -6, -3, 1, -2, -3, 0, -4, 0, 0, 0, 0, 0, 0, -4, 0, -2, -3, 1, -2, -6, -6, -6, -6, -5],
+        [-4, 0, 0, 0, 0, 0, 1, 0, 0, 0, -4, 0, 0, 0, 0, 0, 0, -4, 0, 0, 0, 1, 0, 0, 0, 0, 0, -4],
+        [-2, -6, -6, -6, -6, -5, 1, -7, -5, 0, -4, 0, 0, 0, 0, 0, 0, -4, 0, -7, -5, 1, -7, -6, -6, -6, -6, -3],
+        [0, 0, 0, 0, 0, -4, 1, -4, -4, 0, -2, -6, -6, -6, -6, -6, -6, -3, 0, -4, -4, 1, -4, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, -4, 1, -4, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -4, -4, 1, -4, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, -4, 1, -4, -4, 0, -7, -6, -6, -6, -6, -6, -6, -5, 0, -4, -4, 1, -4, 0, 0, 0, 0, 0],
+        [-7, -6, -6, -6, -6, -3, 1, -2, -3, 0, -2, -6, -6, -5, -7, -6, -6, -3, 0, -2, -3, 1, -2, -6, -6, -6, -6, -5],
+        [-4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -4],
+        [-4, 1, -7, -6, -6, -5, 1, -7, -6, -6, -6, -5, 1, -4, -4, 1, -7, -6, -6, -6, -5, 1, -7, -6, -6, -5, 1, -4],
+        [-4, 1, -2, -6, -5, -4, 1, -2, -6, -6, -6, -3, 1, -2, -3, 1, -2, -6, -6, -6, -3, 1, -4, -7, -6, -3, 1, -4],
+        [-4, 2, 1, 1, -4, -4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -4, -4, 1, 1, 2, -4],
+        [-2, -6, -5, 1, -4, -4, 1, -7, -5, 1, -7, -6, -6, -6, -6, -6, -6, -5, 1, -7, -5, 1, -4, -4, 1, -7, -6, -3],
+        [-7, -6, -3, 1, -2, -3, 1, -4, -4, 1, -2, -6, -6, -5, -7, -6, -6, -3, 1, -4, -4, 1, -2, -3, 1, -2, -6, -5],
+        [-4, 1, 1, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, -4, -4, 1, 1, 1, 1, 1, 1, -4],
+        [-4, 1, -7, -6, -6, -6, -6, -3, -2, -6, -6, -5, 1, -4, -4, 1, -7, -6, -6, -3, -2, -6, -6, -6, -6, -5, 1, -4],
+        [-4, 1, -2, -6, -6, -6, -6, -6, -6, -6, -6, -3, 1, -2, -3, 1, -2, -6, -6, -6, -6, -6, -6, -6, -6, -3, 1, -4],
+        [-4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -4],
+        [-2, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -3]
+        ]
     );
 
     let avaiablePlces = useRef(
@@ -474,7 +510,7 @@ export default function Board({ children }) {
                 if(lives.current > 1)
                 {
                     lives.current--;
-                    resetGame();
+                    resetRound();
                 }
                 else
                 {
@@ -528,7 +564,7 @@ export default function Board({ children }) {
                 if(lives.current > 1)
                     {
                         lives.current--;
-                        resetGame();
+                        resetRound();
                     }
                     else
                     {
@@ -549,21 +585,35 @@ export default function Board({ children }) {
     }
 
     function pacManEatGhost(Ghost) {
+
+        points.current = points.current + 200 * Math.pow(2, combo.current);
+        combo.current++;
         Ghost.setAirState(true); //come back base as skull
         Ghost.setEatable(false);
         Ghost.setTarget({ posRow: 14, posCol: 14 }, btsFinder.current);
     }
 
-    function resetGame()
+    function resetRound()
     {
+        combo.current = 0;
         pacManCharacter.current = new Character(23, 14, Direction.RIGHT);
         redGhostCharacter.current = new Character(13, 13, Direction.UP);
         orangeGhostCharacter.current = new Character(15, 11, Direction.UP);
         pinkGhostCharacter.current = new Character(15, 14, Direction.UP);
         cyanGhostCharacter.current =new Character(15, 16, Direction.UP);
-
         clearTimeout(timeoutEatable.current);
         isBigPelletEaten.current = false;
+    }
+
+    function resetGame()
+    {
+        resetRound();
+        combo.current = 0;
+        points.current = 0;
+        lives.current = 3;
+        board.current = boardCopy.current.map((element) => element.map(square => square));
+        gameState.current = GameState.RUN;
+        setState((prev) => prev + 1);
     }
 
     function moveAllCharacter() {
@@ -625,6 +675,7 @@ export default function Board({ children }) {
             clock.current = setTimeout(() => oneCycleOfGame(), gameCycle);
 
             if (isBigPelletEaten.current == true) {
+                combo.current = 0;
                 changeIsEatableAllGhost(true);
                 isBigPelletEaten.current = false;
                 timeoutEatable.current = setTimeout(() => {
@@ -656,7 +707,7 @@ export default function Board({ children }) {
                         You Got: {points.current}
                     </div>
                     <div className="endButton">
-                        <Button text={'RESTART'}/>
+                        <Button text={'RESTART'} onClickFun={() => resetGame()}/>
                     </div>
                 </div>
             )
