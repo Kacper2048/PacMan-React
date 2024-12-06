@@ -1,0 +1,56 @@
+.UnderButtonStyle
+{
+    display: inline-block;
+    position: absolute;
+    transform: translate(1px, 1px);
+
+    width: 90%;
+    height: 36px;
+
+    cursor: pointer;
+
+    background-color: hsl(155, 100%, 43%);
+    
+    padding: 0px;
+    border: 0px;
+    border-radius: 3px;
+}
+
+.UpperButtonStyle:active
+{
+    transform: translate(0px, 0px);
+}
+
+.UpperButtonStyle
+{
+    display: inline-block;
+    position: absolute;
+    transform: translate(-2px, -2px);
+
+    width: 90%;
+    height: 36px;
+
+    cursor: pointer;
+    background-color: #00b167;
+
+    color: white;
+    text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5);
+
+    padding: 0px;
+    border: 0px;
+    border-radius: 3px;
+    font-size: 13px;
+
+    text-align: center; /* Center text horizontally */
+    line-height: 36px;  /* Center text vertically */
+}
+
+.buttonContainer
+{
+    position: relative;
+    display: flex;
+    align-items: center; /* Vertically center the buttons */
+    justify-content: center; /* Horizontally center the buttons */
+    width: auto;
+    min-height: 50px;
+}

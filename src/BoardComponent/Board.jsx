@@ -15,6 +15,9 @@ import cyanGhost from '../spritesPNG/cyan-ghost-210.png';
 import eatableGhost from '../spritesPNG/eatable-ghost-210.png';
 import skull from '../spritesPNG/skull.png';
 
+import winPic from '../spritesPNG/win.png';
+import losePic from '../spritesPNG/lose.png';
+import Button from '../ButtonComponent/Button.jsx'
 const gameCycle = 150; //150ms
 
 const Direction = Object({
@@ -467,7 +470,16 @@ export default function Board({ children }) {
         if (Ghost.isEatable() == false && Ghost.isAirState() == false) 
          {
             if (Ghost.getPos().posRow == PacManPos.posRow && Ghost.getPos().posCol == PacManPos.posCol) {
-                endOfGame(GameState.LOSE);
+
+                if(lives.current > 1)
+                {
+                    lives.current--;
+                    resetGame();
+                }
+                else
+                {
+                    endOfGame(GameState.LOSE);
+                }
 
                 return true;
             }
@@ -513,9 +525,17 @@ export default function Board({ children }) {
         if (Ghost.isEatable() == false && Ghost.isAirState() == false) 
         {
             if (Ghost.getPos().posRow == PacManPos.posRow && Ghost.getPos().posCol == PacManPos.posCol) {
-                endOfGame(GameState.LOSE);
-
-                return true;
+                if(lives.current > 1)
+                    {
+                        lives.current--;
+                        resetGame();
+                    }
+                    else
+                    {
+                        endOfGame(GameState.LOSE);
+                    }
+    
+                    return true;
             }
             return false
         }
@@ -532,6 +552,18 @@ export default function Board({ children }) {
         Ghost.setAirState(true); //come back base as skull
         Ghost.setEatable(false);
         Ghost.setTarget({ posRow: 14, posCol: 14 }, btsFinder.current);
+    }
+
+    function resetGame()
+    {
+        pacManCharacter.current = new Character(23, 14, Direction.RIGHT);
+        redGhostCharacter.current = new Character(13, 13, Direction.UP);
+        orangeGhostCharacter.current = new Character(15, 11, Direction.UP);
+        pinkGhostCharacter.current = new Character(15, 14, Direction.UP);
+        cyanGhostCharacter.current =new Character(15, 16, Direction.UP);
+
+        clearTimeout(timeoutEatable.current);
+        isBigPelletEaten.current = false;
     }
 
     function moveAllCharacter() {
@@ -597,7 +629,7 @@ export default function Board({ children }) {
                 isBigPelletEaten.current = false;
                 timeoutEatable.current = setTimeout(() => {
                     changeIsEatableAllGhost(false);
-                }, 30000);
+                }, 7000);
             }
 
             return () => { //cleanup
@@ -607,9 +639,39 @@ export default function Board({ children }) {
 
         , [state]);
 
+        function popUpContent(val)
+        {
+            return (
+                <div className="endContent">
+                    <div className="endPic">
+                        <div style={{
+                            width: `${300}px`,
+                            height: `${300}px`,
+                            backgroundImage: `url(${ val == 'win' ? winPic : losePic})`,
+                            backgroundSize: `${300}px ${300}px`, // Scale the background image
+                            backgroundRepeat: "no-repeat",
+                        }}/>
+                    </div>
+                    <div className="endText">
+                        You Got: {points.current}
+                    </div>
+                    <div className="endButton">
+                        <Button text={'RESTART'}/>
+                    </div>
+                </div>
+            )
+        }
+
     function renderBoard() {
         return (
+
+            <div className="backgroundontainer" >
+            {
+            gameState.current == GameState.RUN ?      
+                
             <div className="Game">
+              
+
                 <div className="PointsAndLife">
                     <div>
                         <div>SCORE: {`${points.current}`}</div>
@@ -655,8 +717,24 @@ export default function Board({ children }) {
                     </div>
                 </div>
 
+  
+
 
             </div>
+                
+            :
+            <div className="popUpWindow">
+                {
+                    gameState.current == GameState.WIN ? 
+                    popUpContent('win')
+                    :
+                    popUpContent('lose')
+                }
+            </div>
+            }            
+            </div>
+              
+
         )
     }
 

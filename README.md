@@ -8,7 +8,7 @@ This project is a browser-based implementation of the classic Pac-Man game, buil
 
 **Key functionalities include**
 
-- 🗺**Player-controlled Pac-Man navigating the grid.**🗺
+- 🗺 **Player-controlled Pac-Man navigating the grid.** 🗺
 - 👻 **BFS-driven  ghosts** 👻
 - 🏆 **Score tracking for pellets eaten and bonuses collected.** 🏆
 - 🙏 **Responsive design, ensuring smooth play on different devices** (Provided that we play at 1920x1080)🙏
