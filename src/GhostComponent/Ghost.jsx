@@ -32,9 +32,9 @@ export default function Ghost({children, ghostSprite, isFreez, isEatable, isAirS
         
         if(!isFreez)
         {
-            console.log("ghost airstate: " + isAirState)
             RowPercOfProgress.current = RowPercOfProgress.current % tileSize; //that two lines delete that funy error
             ColPercOfProgress.current = ColPercOfProgress.current % tileSize;
+            
             timeOut.current = setTimeout(()=>{
     
                 switch(dir)

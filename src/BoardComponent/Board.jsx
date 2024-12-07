@@ -18,6 +18,9 @@ import skull from '../spritesPNG/skull.png';
 import winPic from '../spritesPNG/win.png';
 import losePic from '../spritesPNG/lose.png';
 import Button from '../ButtonComponent/Button.jsx'
+
+
+
 const gameCycle = 150; //150ms
 
 const Direction = Object({
@@ -31,7 +34,8 @@ const GameState = Object({
     LOSE: -1,
     START: 0,
     RUN: 1,
-    WIN: 2
+    WIN: 2,
+    DEAD: 3
 });
 
 
@@ -49,6 +53,7 @@ class Character {
         this.posCol = posCol;
         this.actDir = actDir;
         this.angleOfRotate = (this.actDir * 90) % 360;
+        this.#arrayWithCommand = []
         this.isFreez = false;
     }
 
@@ -88,8 +93,15 @@ class Character {
 
     changeDir(dir) //must be one of the Direction
     {
-        this.actDir = dir;
-        this.angleOfRotate = (this.actDir * 90) % 360;
+        if(dir != undefined)
+        {
+            this.actDir = dir;
+            this.angleOfRotate = (this.actDir * 90) % 360;
+        }
+        else
+        {
+            this.actDir = undefined; 
+        }
     }
 
     getDir() {
@@ -120,6 +132,8 @@ class Character {
                         this.posRow = this.posRow - 1;
                     }
                     break;
+                default:
+                    break;
             }
         }
     }
@@ -139,40 +153,27 @@ class Character {
     {
 
         if (this.#arrayWithCommand.length == 0) {
-            if (this.#airState == true) {
+
+            if (this.#airState == true) 
+            {
                 this.#airState = false;
                 this.#eatable = false;
             }
-            do {
-                this.generateNewCommands(btsFinder.doYouKnowTheWay({ row: this.posRow, col: this.posCol }, { row: this.getRandomFromAvaiable([...arr]).row, col: this.getRandomFromAvaiable([...arr]).col }));
-                console.log("try")
-            } while (this.#arrayWithCommand.length < 5)
-            console.log(`@len: ${this.#arrayWithCommand.length}:`);
-        }
-        this.changeDir(this.#arrayWithCommand.shift()) //change dir for first element in array with commands
 
-        switch (this.actDir) {
-            case 0:
-                {
-                    this.posCol = this.posCol + 1;
-                }
-                break;
-            case 1:
-                {
-                    this.posRow = this.posRow + 1;
-                }
-                break;
-            case 2:
-                {
-                    this.posCol = this.posCol - 1;
-                }
-                break;
-            case 3:
-                {
-                    this.posRow = this.posRow - 1;
-                }
-                break;
+            do 
+            {
+                this.generateNewCommands(btsFinder.doYouKnowTheWay(
+                    { row: this.posRow, col: this.posCol },
+                    { row: this.getRandomFromAvaiable([...arr]).row, col: this.getRandomFromAvaiable([...arr]).col })
+                );
+                
+            } while (this.#arrayWithCommand.length < 5)
+
+            this.changeDir(undefined)
         }
+        this.move();
+        this.changeDir(this.#arrayWithCommand.shift()) //change dir for first element in array with commands
+        
     }
 
     generateNewCommands(arrayOfPos) // run when collision event occur - get new set of pos where to go [{pos,col}, ..., {pos,col}]
@@ -224,6 +225,7 @@ export default function Board({ children }) {
     let timeoutEatable = useRef(null);
     let isBigPelletEaten = useRef(null);
     let combo = useRef(0);
+    let waitDead = useRef(null);
 
     let board = useRef(
         [[-7, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -5, -7, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -5],
@@ -388,46 +390,6 @@ export default function Board({ children }) {
 
     function endOfGame(status) {
         gameState.current = status;
-        pacManCharacter.current.setFreez(true);
-        redGhostCharacter.current.setFreez(true);
-    }
-
-    function ghostCollisionWithWall({ posRow, posCol }, dir) {
-        switch (dir) {
-            case 0:
-                {
-                    posCol++;
-                }
-                break;
-
-            case 1:
-                {
-                    posRow++;
-                }
-                break;
-
-            case 2:
-                {
-                    posCol--;
-                }
-                break;
-
-            case 3:
-                {
-                    posRow--;
-                }
-                break;
-        }
-
-        if (board.current[posRow][posCol] < 0) {
-            let randomNumber = Math.floor(Math.random() * 4);
-            //redGhostCharacter.current.changeDir(randomNumber);
-            redGhostCharacter.current.setFreez(true);
-        }
-        else {
-            redGhostCharacter.current.setFreez(false);
-            return false;
-        }
     }
 
     function checkCollisionWithWall({ posRow, posCol }, dir) {
@@ -510,6 +472,7 @@ export default function Board({ children }) {
                 if(lives.current > 1)
                 {
                     lives.current--;
+                    gameState.current = GameState.DEAD;
                     resetRound();
                 }
                 else
@@ -564,6 +527,7 @@ export default function Board({ children }) {
                 if(lives.current > 1)
                     {
                         lives.current--;
+                        gameState.current = GameState.DEAD;
                         resetRound();
                     }
                     else
@@ -601,8 +565,17 @@ export default function Board({ children }) {
         orangeGhostCharacter.current = new Character(15, 11, Direction.UP);
         pinkGhostCharacter.current = new Character(15, 14, Direction.UP);
         cyanGhostCharacter.current =new Character(15, 16, Direction.UP);
-        clearTimeout(timeoutEatable.current);
+
+        pacManCharacter.current.setFreez(true);
+        redGhostCharacter.current.setFreez(true);
+        orangeGhostCharacter.current.setFreez(true);
+        pinkGhostCharacter.current.setFreez(true);
+        cyanGhostCharacter.current.setFreez(true);
+
         isBigPelletEaten.current = false;
+
+        clearTimeout(timeoutEatable.current);
+        clearTimeout(waitDead);
     }
 
     function resetGame()
@@ -611,8 +584,10 @@ export default function Board({ children }) {
         combo.current = 0;
         points.current = 0;
         lives.current = 3;
+        howManyPelets.current = board.current.reduce((total, element) => { return total = total + element.filter((square) => square == 1).length }, 0);
         board.current = boardCopy.current.map((element) => element.map(square => square));
-        gameState.current = GameState.RUN;
+
+        gameState.current = GameState.START;
         setState((prev) => prev + 1);
     }
 
@@ -629,7 +604,7 @@ export default function Board({ children }) {
     function oneCycleOfGame() {
 
         if (gameState.current == GameState.RUN) {
-            setState((prev) => prev + 1);
+            
             isPointEaten(pacManCharacter.current.getPos());
             moveAllCharacter();
 
@@ -645,21 +620,21 @@ export default function Board({ children }) {
             checkCollisionWithGhost(cyanGhostCharacter.current, pacManCharacter.current.getDir(), pacManCharacter.current.getPos())
 
             //orange
-            ghostCollisionWithWall(orangeGhostCharacter.current.getPos(), orangeGhostCharacter.current.getDir());
+
             checkCollisionWithPacMan(orangeGhostCharacter.current, pacManCharacter.current.getPos())
 
             //red
-            ghostCollisionWithWall(redGhostCharacter.current.getPos(), redGhostCharacter.current.getDir());
+           
             checkCollisionWithPacMan(redGhostCharacter.current, pacManCharacter.current.getPos())
                 
             //pink
-            ghostCollisionWithWall(pinkGhostCharacter.current.getPos(), pinkGhostCharacter.current.getDir());
+           
             checkCollisionWithPacMan(pinkGhostCharacter.current, pacManCharacter.current.getPos())
 
             //cyan
-            ghostCollisionWithWall(cyanGhostCharacter.current.getPos(), cyanGhostCharacter.current.getDir());
+           
             checkCollisionWithPacMan(cyanGhostCharacter.current, pacManCharacter.current.getPos())
-
+            setState((prev) => prev + 1);
         }
     }
 
@@ -672,7 +647,30 @@ export default function Board({ children }) {
 
     useEffect( //set clock
         () => {
-            clock.current = setTimeout(() => oneCycleOfGame(), gameCycle);
+
+            if(gameState.current == GameState.DEAD || gameState.current == GameState.START)
+            {
+                waitDead = setTimeout( () =>
+                {
+                    gameState.current = GameState.RUN;
+                    clock.current = setTimeout(() => 
+                        {
+                        
+                        pacManCharacter.current.setFreez(false)
+                        redGhostCharacter.current.setFreez(false)
+                        orangeGhostCharacter.current.setFreez(false)
+                        pinkGhostCharacter.current.setFreez(false)
+                        cyanGhostCharacter.current.setFreez(false)
+                        
+                        oneCycleOfGame()}, gameCycle);
+                }, 2000);
+               
+            }
+            else
+            {
+                clock.current = setTimeout(() => oneCycleOfGame(), gameCycle);
+            }
+           
 
             if (isBigPelletEaten.current == true) {
                 combo.current = 0;
@@ -685,6 +683,7 @@ export default function Board({ children }) {
 
             return () => { //cleanup
                 clearTimeout(clock.current);
+                clearTimeout(waitDead);
             }
         }
 
@@ -718,7 +717,7 @@ export default function Board({ children }) {
 
             <div className="backgroundontainer" >
             {
-            gameState.current == GameState.RUN ?      
+            (gameState.current == GameState.RUN || gameState.current == GameState.DEAD || gameState.current == GameState.START)?      
                 
             <div className="Game">
               
@@ -729,7 +728,7 @@ export default function Board({ children }) {
                         <div className="livesDiv">{generateLives()}</div>
                     </div>
                 </div>
-
+              
                 <div className="board" tabIndex={0} onKeyDown={(event) => getKey(event)}>
                     {board.current.map((element, row) => (
                         <div key={row} className="row">
@@ -776,7 +775,7 @@ export default function Board({ children }) {
             :
             <div className="popUpWindow">
                 {
-                    gameState.current == GameState.WIN ? 
+                    (gameState.current == GameState.WIN && gameState.current != GameState.DEAD)? 
                     popUpContent('win')
                     :
                     popUpContent('lose')
