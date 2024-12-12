@@ -19,7 +19,14 @@ import winPic from '../spritesPNG/win.png';
 import losePic from '../spritesPNG/lose.png';
 import Button from '../ButtonComponent/Button.jsx'
 
-
+import useSound from 'use-sound';
+import eatGhost from '../sounds/eatGhost.mp3';
+import PacManWalk from '../sounds/move.mp3';
+import dead1 from '../sounds/dead1.mp3';
+import dead2 from '../sounds/dead2.mp3';
+import dead3 from '../sounds/dead3.mp3';
+import vixa from '../sounds/vixa.mp3';
+import win from '../sounds/win.mp3';
 
 const gameCycle = 150; //150ms
 
@@ -226,6 +233,18 @@ export default function Board({ children }) {
     let isBigPelletEaten = useRef(null);
     let combo = useRef(0);
     let waitDead = useRef(null);
+    let makeSoundMovePacManTimer = useRef(1000);
+    //sound block   
+    let [consumptionOfGhost, { stopConsumptionOfGhost }] = useSound(eatGhost);
+    let [makeSoundMovePacMan, objControlMoveSoundPacMan] = useSound(PacManWalk);
+    let [makeSoundDead1, objControlmakeSoundDead1] = useSound(dead1);
+    let [makeSoundDead2, objControlmakeSoundDead2] = useSound(dead2);
+    let [makeSoundDead3, objControlmakeSoundDead3] = useSound(dead3);
+    let [makeSoundVixa, objControlmakeVixa] = useSound(vixa);
+    let [makeSoundWin, objControlmakeWin] = useSound(win);
+
+
+    let ifMoveSoundPacMan = useRef(false);
 
     let board = useRef(
         [[-7, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -5, -7, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -5],
@@ -385,6 +404,7 @@ export default function Board({ children }) {
             board.current[posRow][posCol] = 0;
             points.current = points.current + 20;
             isBigPelletEaten.current = true;
+            makeSoundVixa();
         }
     }
 
@@ -431,6 +451,14 @@ export default function Board({ children }) {
         }
         else {
             pacManCharacter.current.setFreez(false);
+
+            makeSoundMovePacManTimer.current = makeSoundMovePacManTimer.current + gameCycle;
+
+            if(makeSoundMovePacManTimer.current > 420)
+            {
+                makeSoundMovePacMan();
+                makeSoundMovePacManTimer.current =0;
+            }
             return false;
         }
 
@@ -555,6 +583,7 @@ export default function Board({ children }) {
         Ghost.setAirState(true); //come back base as skull
         Ghost.setEatable(false);
         Ghost.setTarget({ posRow: 14, posCol: 14 }, btsFinder.current);
+        consumptionOfGhost();
     }
 
     function resetRound()
@@ -649,7 +678,22 @@ export default function Board({ children }) {
         () => {
 
             if(gameState.current == GameState.DEAD || gameState.current == GameState.START)
-            {
+            { 
+                switch(lives.current)
+                {
+                    case 2:
+                        makeSoundDead1()
+                    break;
+        
+                    case 1:
+                        makeSoundDead2()
+                    break;
+        
+                    case 0:
+                        makeSoundDead3()
+                    break;
+                }
+
                 waitDead = setTimeout( () =>
                 {
                     gameState.current = GameState.RUN;
@@ -663,8 +707,7 @@ export default function Board({ children }) {
                         cyanGhostCharacter.current.setFreez(false)
                         
                         oneCycleOfGame()}, gameCycle);
-                }, 2000);
-               
+                }, 2000);       
             }
             else
             {
@@ -676,7 +719,9 @@ export default function Board({ children }) {
                 combo.current = 0;
                 changeIsEatableAllGhost(true);
                 isBigPelletEaten.current = false;
+
                 timeoutEatable.current = setTimeout(() => {
+                    objControlmakeVixa.stop();
                     changeIsEatableAllGhost(false);
                 }, 7000);
             }
@@ -684,6 +729,7 @@ export default function Board({ children }) {
             return () => { //cleanup
                 clearTimeout(clock.current);
                 clearTimeout(waitDead);
+                
             }
         }
 
@@ -691,6 +737,15 @@ export default function Board({ children }) {
 
         function popUpContent(val)
         {
+            if(val == 'win')
+            {
+                makeSoundWin();
+            }
+            {
+                makeSoundDead3();
+            }
+           
+
             return (
                 <div className="endContent">
                     <div className="endPic">
