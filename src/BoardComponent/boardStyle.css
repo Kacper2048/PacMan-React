@@ -209,18 +209,96 @@
 
 }
 
-.backgroundontainer
+.backgroundcontainer
 {
+    z-index: 0;
     width: 100%;
     height: 100%;
     display: grid;
     grid-template-columns: 100%;
     grid-template-rows: 100%;
+    position: relative;
 
-    justify-content: center;
+    justify-content: center;    
     justify-items: center;
     align-content: center;
 }
+
+.popUpMenu
+{
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+
+    position: absolute;
+    z-index: 10;
+
+    justify-content: center;    
+    justify-items: center;
+    align-content: center;
+
+    backdrop-filter: blur(10px);
+}
+
+.popUpMenuInner
+{
+    display: grid;
+
+    position: absolute;
+    top: 150px;
+    right: 1150px;
+
+    height: 150px;
+    width: 300px;
+
+    font-size: 30px;
+    font-weight: 800;
+
+    color: bisque;
+    background-color: rgb(32, 32, 32);
+
+    justify-content: center;  /* Centers text horizontally */
+    align-items: center;      /* Centers text vertically */
+    text-align: center;       /* Optional: ensures text is centered if it wraps */
+    border-radius: 10px;
+}
+
+.popUpMenuRestart
+{
+    display: flex;
+    width: 250px;
+    height: 50px;
+    border: 50px 10px 50px 10px;
+    border-radius: 10px;
+    font-size: 30px;
+    text-align: center;
+    justify-content: center; /* Horizontal centering */
+    align-items: center;    /* Vertical centering */
+}
+.popUpMenuRestart:hover
+{
+    cursor: pointer;
+    background-color: rgb(92, 92, 92);
+}
+
+.popUpMenuClose
+{
+    display: flex;
+    width: 250px;
+    height: 50px;
+    border: 50px 10px 50px 10px;
+    border-radius: 10px;
+    font-size: 30px;
+    text-align: center;
+    justify-content: center; /* Horizontal centering */
+    align-items: center;    /* Vertical centering */
+}
+.popUpMenuClose:hover
+{
+    cursor: pointer;
+    background-color: rgb(92, 92, 92);
+}
+
 
 .popUpWindow
 {

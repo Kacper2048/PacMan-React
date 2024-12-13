@@ -234,6 +234,9 @@ export default function Board({ children }) {
     let combo = useRef(0);
     let waitDead = useRef(null);
     let makeSoundMovePacManTimer = useRef(1000);
+
+    let isPopUpMenuShow = useRef(false);
+
     //sound block   
     let [consumptionOfGhost, { stopConsumptionOfGhost }] = useSound(eatGhost);
     let [makeSoundMovePacMan, objControlMoveSoundPacMan] = useSound(PacManWalk);
@@ -454,7 +457,7 @@ export default function Board({ children }) {
 
             makeSoundMovePacManTimer.current = makeSoundMovePacManTimer.current + gameCycle;
 
-            if(makeSoundMovePacManTimer.current > 420)
+            if(makeSoundMovePacManTimer.current > 440)
             {
                 makeSoundMovePacMan();
                 makeSoundMovePacManTimer.current =0;
@@ -609,6 +612,7 @@ export default function Board({ children }) {
 
     function resetGame()
     {
+        isPopUpMenuShow.current = false;
         resetRound();
         combo.current = 0;
         points.current = 0;
@@ -741,6 +745,7 @@ export default function Board({ children }) {
             {
                 makeSoundWin();
             }
+            else
             {
                 makeSoundDead3();
             }
@@ -767,10 +772,37 @@ export default function Board({ children }) {
             )
         }
 
+    function openMenu()
+    {
+        isPopUpMenuShow.current = true;
+        setState((prev)=>prev+1);
+        console.log("menu clicked");
+    }
+
     function renderBoard() {
         return (
 
-            <div className="backgroundontainer" >
+            <div>
+            { 
+                (isPopUpMenuShow.current == true ) 
+                ?
+                <div className="popUpMenu">
+                    <div className="popUpMenuInner">
+                    <div className="popUpMenuRestart" onClick={()=>{ resetGame()}}>
+                        RESTART
+                    </div>    
+
+                    <div className="popUpMenuClose" onClick={() => {isPopUpMenuShow.current = false}}>
+                        CLOSE
+                    </div>    
+                    </div>
+                </div>    
+
+                :
+                <>
+                </>
+            }   
+            <div className="backgroundcontainer" >
             {
             (gameState.current == GameState.RUN || gameState.current == GameState.DEAD || gameState.current == GameState.START)?      
                 
@@ -818,15 +850,11 @@ export default function Board({ children }) {
 
                 <div className="menuButton">
                     <div>
-                        <div>MENU</div>
+                        <div onClick={() => openMenu()}>MENU</div>
                     </div>
                 </div>
 
-  
-
-
             </div>
-                
             :
             <div className="popUpWindow">
                 {
@@ -839,7 +867,7 @@ export default function Board({ children }) {
             }            
             </div>
               
-
+            </div>
         )
     }
 
